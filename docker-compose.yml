@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - ./backend:/mangler
+      - ./uploads:/mangler/uploads
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - mangler-net
+  
+  textgen:
+    build:
+      context: ./textgen
+      dockerfile: Dockerfile
+    volumes:
+      - ./textgen:/mangler
+      - ./uploads:/mangler/uploads
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - mangler-net
+  
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - mangler-net
+  
+volumes:
+  redis_data:
+
+networks:
+  mangler-net:
+    driver: bridge
