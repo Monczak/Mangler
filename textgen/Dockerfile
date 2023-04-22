@@ -1,12 +1,21 @@
+ARG MANGLER_ROOT
 FROM python:3.11
 
-WORKDIR /usr/src/mangler
+ARG MANGLER_ROOT
+
+ARG HOST="0.0.0.0"
+ARG PORT=5000
+
+WORKDIR ${MANGLER_ROOT}
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+ENV HOST=${HOST}
+ENV PORT=${PORT}
+
+EXPOSE ${PORT}
 
 CMD ["python", "app.py"]

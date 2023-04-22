@@ -1,16 +1,24 @@
+import os
+
 from flask import Flask, jsonify, request
 
+from tasks import generate_text_task
+
 app = Flask(__name__)
-app.config.from_object("config")
+app.config.from_object("flask-config")
+
+host = os.environ["HOST"]
+port = int(os.environ["PORT"])
 
 
 @app.route("/generate_text", methods=["POST"])
 def generate_text():
-    input_files = request.json["input_files"]
+    input_id = request.json["input_id"]
     
+    task = generate_text_task.delay(input_id)
 
-    return jsonify({"task_id": 0}), 202
+    return jsonify({"task_id": task.id}), 202
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host=host, port=port)
