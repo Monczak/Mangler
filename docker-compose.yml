@@ -8,8 +8,8 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - ./backend:/mangler
-      - ./uploads:/mangler/uploads
+      - ./backend:/usr/src/mangler
+      - ./uploads:/usr/src/mangler/uploads
     environment:
       - REDIS_URL=redis://redis:6379/0
     depends_on:
@@ -22,8 +22,8 @@ services:
       context: ./textgen
       dockerfile: Dockerfile
     volumes:
-      - ./textgen:/mangler
-      - ./uploads:/mangler/uploads
+      - ./textgen:/usr/src/mangler
+      - ./uploads:/usr/src/mangler/uploads
     environment:
       - REDIS_URL=redis://redis:6379/0
     depends_on:
@@ -33,8 +33,6 @@ services:
   
   redis:
     image: redis
-    ports:
-      - 6379:6379
     volumes:
       - redis_data:/data
     networks:
