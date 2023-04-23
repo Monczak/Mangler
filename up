@@ -9,4 +9,4 @@ export MANGLER_ROOT=/usr/src/mangler
 export MANGLER_UPLOADS=$MANGLER_ROOT/uploads
 export MANGLER_GENERATED=$MANGLER_ROOT/generated
 
-docker-compose up --build $@
+docker-compose up $@
