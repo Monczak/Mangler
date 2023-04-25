@@ -1,10 +1,29 @@
+from enum import Enum
+from pathlib import Path
+import pickle
+import ujson
+import uuid
+
+
+class FreqDictSerializer(Enum):
+    JSON = ".json"
+    PICKLE = ".bin"
+
+
 class FreqDict:
-    def __init__(self):
-        self._dict = {}
+    def __init__(self, depths, name="", dict={}, serializer=FreqDictSerializer.PICKLE):
+        self.depths = set(depths)
+        self.name = name if name else str(uuid.uuid4())
+        self._dict = dict
+        self._serializer = serializer
 
     @property
     def letters(self):
         return list(self._dict.keys())
+    
+    @property
+    def cache_filename(self):
+        return f"{self.name}{self._serializer.value}"
 
     def prefixes(self, current):
         if current not in self._dict:
@@ -62,7 +81,50 @@ class FreqDict:
         return self
     
     def merge(self, other):
+        self.depths |= other.depths
         for current, prefix, next, freq in other.all_values():
             self.update(current, prefix, next, freq)
 
         return self
+    
+    def serialize(self):
+        dict = {
+            "name": self.name,
+            "freqs": self._dict,
+            "depths": list(self.depths)
+        }
+        match self._serializer:
+            case FreqDictSerializer.JSON:
+                return bytes(ujson.dumps(dict), encoding="utf-8")
+            case FreqDictSerializer.PICKLE:
+                return pickle.dumps(dict)
+            case _:
+                raise AttributeError("invalid serializer")
+    
+    @staticmethod
+    def deserialize(bytes, serializer):
+        match serializer:
+            case FreqDictSerializer.JSON:
+                dict = ujson.loads(bytes.decode(encoding="utf-8"))
+            case FreqDictSerializer.PICKLE:
+                dict = pickle.loads(bytes)
+            case _:
+                raise AttributeError("invalid serializer")
+        return FreqDict(depths=set(dict["depths"]), name=dict["name"], dict=dict["freqs"])
+    
+    def save_cache(self, dir):
+        with open(Path(dir) / self.cache_filename, "wb") as file:
+            file.write(self.serialize())
+
+    @staticmethod
+    def load_cache(path):
+        cache_path = Path(path)
+        if not cache_path.exists():
+            return None
+        with open(cache_path, "rb") as file:
+            freq_dict = FreqDict.deserialize(file.read(), FreqDictSerializer(cache_path.suffix))
+            return freq_dict
+
+    
+    def same_dicts(self, depths):
+        return self.depths == set(depths) 

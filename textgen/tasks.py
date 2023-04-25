@@ -4,7 +4,7 @@ from pathlib import Path
 
 from celery import Celery
 
-celery = Celery(__name__, broker=os.environ["REDIS_URL"])
+celery = Celery(__name__, broker=os.environ["REDIS_URL"], backend=os.environ["REDIS_URL"])
 
 @celery.task
 def generate_text_task(input_id):
