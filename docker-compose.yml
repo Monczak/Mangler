@@ -33,6 +33,7 @@ services:
     volumes:
       - uploads:${MANGLER_UPLOADS}
       - generated:${MANGLER_GENERATED}
+      - cache:${MANGLER_ROOT}/cache
     environment:
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
@@ -55,6 +56,7 @@ services:
     volumes:
       - uploads:${MANGLER_UPLOADS}
       - generated:${MANGLER_GENERATED}
+      - cache:${MANGLER_ROOT}/cache
     environment:
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
@@ -78,6 +80,7 @@ services:
 volumes:
   uploads:
   generated:
+  cache:
   redis_data:
 
 networks:

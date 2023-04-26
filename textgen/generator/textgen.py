@@ -26,6 +26,9 @@ class TextGenerator:
         
         return freq_dict
 
+    # TODO: Handle cases where source_id is invalid
+    # Why does this work for source_ids that don't exist?
+    # Also refactor file handling out of this
     def analyze(self, source_id, depths):
         pattern = f"{source_id}.*"
 
@@ -59,7 +62,7 @@ class TextGenerator:
         found_cache = files[0]
         return FreqDictSerializer.load_cache(found_cache)
 
-    def generate(self, seed, freq_dict, depth):
+    def make_generator(self, seed, freq_dict, depth):
         if depth not in freq_dict.depths:
             raise ValueError(f"invalid depth, must be one of {freq_dict.depths}")
         

@@ -14,8 +14,10 @@ port = int(os.environ["PORT"])
 @app.route("/generate_text", methods=["POST"])
 def generate_text():
     input_id = request.json["input_id"]
+    depths = request.json["depths"]
+    seed = request.json["seed"]
     
-    task = generate_text_task.delay(input_id)
+    task = generate_text_task.delay(input_id, depths, seed, 10000)
 
     return jsonify({"task_id": task.id}), 202
 
