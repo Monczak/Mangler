@@ -1,4 +1,5 @@
 import logging
+import random
 
 from pathlib import Path
 from freqdict import FreqDict, FreqDictSerializer
@@ -58,7 +59,23 @@ class TextGenerator:
         found_cache = files[0]
         return FreqDict.load_cache(found_cache)
 
-    def generate(self):
-        raise NotImplementedError()
+    # TODO: Rewrite this, this was just for a test - use a ring buffer
+    def generate(self, seed, freq_dict, depth):
+        if depth not in freq_dict.depths:
+            raise ValueError(f"invalid depth, must be one of {freq_dict.depths}")
+        
+        if len(seed) <= depth:
+            raise ValueError(f"seed too short, must be at least {depth + 1} chars long")
+        
+        def generator():
+            text = seed
+            while True:
+                current = text[-1]
+                previous = text[-depth-1:-1]
+                candidates = freq_dict.successors(current, previous)
+                next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)
+                text += next[0]
+                yield next[0]
+        return generator
             
         
