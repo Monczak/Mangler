@@ -2,20 +2,21 @@ import logging
 import random
 
 from pathlib import Path
-from freqdict import FreqDict, FreqDictSerializer
+from .freqdict import FreqDict, FreqDictSerializer, FreqDictSerializerMode
+from utils.ringbuffer import RingBuffer
 
 
 class TextGenerator:
-    def __init__(self, source_dir, cache_dir, serializer=FreqDictSerializer.PICKLE):
+    def __init__(self, source_dir, cache_dir, mode=FreqDictSerializerMode.PICKLE):
         self.source_dir = Path(source_dir)
         self.cache_dir = Path(cache_dir)
-        self._serializer = serializer
+        self._serializer = FreqDictSerializer(mode)
 
         if not self.cache_dir.exists():
             self.cache_dir.mkdir()
 
     def _analyze_text(self, text, depth):
-        freq_dict = FreqDict(depths=[depth], serializer=self._serializer)
+        freq_dict = FreqDict(depths=[depth])
 
         for i in range(depth, len(text) - 1):
             current = text[i]
@@ -25,14 +26,13 @@ class TextGenerator:
         
         return freq_dict
 
-    # TODO: Refactor this to separate cache handling 
     def analyze(self, source_id, depths):
         pattern = f"{source_id}.*"
 
         freq_dict = self.load_cache(source_id)
         if not freq_dict or not freq_dict.same_dicts(depths):
             logging.info(f"Creating new freqdict for {source_id}")
-            freq_dict = FreqDict(name=source_id, depths=depths, serializer=self._serializer)
+            freq_dict = FreqDict(name=source_id, depths=depths)
 
             for file in Path.glob(self.source_dir, pattern):
                 with open(file, "r") as text_file:
@@ -49,7 +49,7 @@ class TextGenerator:
     
     def save_cache(self, freq_dict):
         logging.info(f"Caching {freq_dict.name}")
-        freq_dict.save_cache(self.cache_dir)
+        self._serializer.save_cache(freq_dict, self.cache_dir)
     
     def load_cache(self, source_id):
         files = list(Path.glob(self.cache_dir, f"{source_id}.*"))
@@ -57,9 +57,8 @@ class TextGenerator:
             return None
         
         found_cache = files[0]
-        return FreqDict.load_cache(found_cache)
+        return FreqDictSerializer.load_cache(found_cache)
 
-    # TODO: Rewrite this, this was just for a test - use a ring buffer
     def generate(self, seed, freq_dict, depth):
         if depth not in freq_dict.depths:
             raise ValueError(f"invalid depth, must be one of {freq_dict.depths}")
@@ -67,15 +66,23 @@ class TextGenerator:
         if len(seed) <= depth:
             raise ValueError(f"seed too short, must be at least {depth + 1} chars long")
         
+        buffer = RingBuffer(depth + 1)
+        buffer.fill(seed[-depth - 1:])
+
         def generator():
-            text = seed
+            nonlocal buffer
             while True:
-                current = text[-1]
-                previous = text[-depth-1:-1]
+                current = buffer.peek()
+                previous = "".join(buffer.peek(lookbehind=depth)[:-1])
                 candidates = freq_dict.successors(current, previous)
-                next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)
-                text += next[0]
-                yield next[0]
-        return generator
+
+                if not candidates:
+                    # Backtrack and try again?
+                    pass
+
+                next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)[0]
+                buffer.write(next)
+                yield next
+        return generator()
             
         
