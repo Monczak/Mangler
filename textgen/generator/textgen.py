@@ -6,6 +6,19 @@ from .freqdict import FreqDict, FreqDictSerializer, FreqDictSerializerMode
 from utils.ringbuffer import RingBuffer
 
 
+class TextgenError(Exception):
+    INVALID_DEPTH = 0
+    INVALID_SEED = 1
+
+    def __init__(self, kind, message, *args):
+        super().__init__(*args)
+        self.message = message
+        self.kind = kind
+
+    def __str__(self):
+        return self.message
+
+
 class TextGenerator:
     def __init__(self, source_dir, cache_dir, mode=FreqDictSerializerMode.PICKLE):
         self.source_dir = Path(source_dir)
@@ -25,29 +38,40 @@ class TextGenerator:
             freq_dict.update(current, prefix, next)
         
         return freq_dict
-
-    # TODO: Handle cases where source_id is invalid
-    # Why does this work for source_ids that don't exist?
-    # Also refactor file handling out of this
-    def analyze(self, source_id, depths):
+    
+    def find_files(self, source_id):
         pattern = f"{source_id}.*"
+        files = list(Path.glob(self.source_dir, pattern))
+        return files
+
+    def analyze(self, source_id, depths):
+        files = self.find_files(source_id)
+        if not files:
+            raise FileNotFoundError(f"No matches for {source_id}")
+
+        logging.info(f"Found {len(files)} source files for {source_id}")
 
         freq_dict = self.load_cache(source_id)
         if not freq_dict or not freq_dict.same_dicts(depths):
             logging.info(f"Creating new freqdict for {source_id}")
-            freq_dict = FreqDict(name=source_id, depths=depths)
-
-            for file in Path.glob(self.source_dir, pattern):
-                with open(file, "r") as text_file:
-                    text = text_file.read()
-                    for depth in depths:
-                        sub_dict = self._analyze_text(text, depth)
-                        freq_dict.merge(sub_dict)
-            freq_dict.normalize()
+            freq_dict = self.analyze_files(source_id, depths)
             self.save_cache(freq_dict)
         else:
             logging.info(f"Using cached freqdict for {source_id}")
 
+        return freq_dict
+
+    def analyze_files(self, source_id, depths):
+        freq_dict = FreqDict(name=source_id, depths=depths)
+
+        for path in self.find_files(source_id):
+            with open(path, "r") as text_file:
+                text = text_file.read()
+                for depth in depths:
+                    sub_dict = self._analyze_text(text, depth)
+                    freq_dict.merge(sub_dict)
+        
+        freq_dict.normalize()
         return freq_dict
     
     def save_cache(self, freq_dict):
@@ -64,10 +88,10 @@ class TextGenerator:
 
     def make_generator(self, seed, freq_dict, depth):
         if depth not in freq_dict.depths:
-            raise ValueError(f"invalid depth, must be one of {freq_dict.depths}")
+            raise TextgenError(TextgenError.INVALID_DEPTH, f"Invalid depth, must be one of {freq_dict.depths}")
         
         if len(seed) <= depth:
-            raise ValueError(f"seed too short, must be at least {depth + 1} chars long")
+            raise TextgenError(TextgenError.INVALID_SEED, f"Seed too short, must be at least {depth + 1} chars long")
         
         buffer = RingBuffer(depth + 1)
         buffer.fill(seed[-depth - 1:])
@@ -87,5 +111,5 @@ class TextGenerator:
                 buffer.write(next)
                 yield next
         return generator()
-            
+
         
