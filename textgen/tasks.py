@@ -27,12 +27,17 @@ def generate_text_task(self, input_id, depth, seed, length):
 
         with open(Path(os.environ["GENERATED"]) / input_id, "w") as file:
             while chars_left > 0:
-                buffer = "".join([next(generator) for _ in range(min(chars_left, buffer_size))])
+                buffer = "".join([generator.next for _ in range(min(chars_left, buffer_size))])
                 file.write(buffer)
                 chars_left -= len(buffer)
 
+                self.update_state(state="PROGRESS", meta={"current": generator.count, "total": length})
+
         return {"result": "success"}
-    except Exception as err:
+    except (FileNotFoundError, TextgenError) as err:
         logging.warning(str(err))
+        raise Ignore()
+    except Exception as err:
+        logging.error(str(err))
         raise TaskFailure(err)
     

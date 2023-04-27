@@ -88,10 +88,10 @@ class TextGenerator:
 
     def make_generator(self, seed, freq_dict, depth):
         if depth not in freq_dict.depths:
-            raise TextgenError(TextgenError.INVALID_DEPTH, f"Invalid depth, must be one of {freq_dict.depths}")
+            raise TextgenError(TextgenError.INVALID_DEPTH, f"Depth {depth} is invalid, must be one of {freq_dict.depths}")
         
         if len(seed) <= depth:
-            raise TextgenError(TextgenError.INVALID_SEED, f"Seed too short, must be at least {depth + 1} chars long")
+            raise TextgenError(TextgenError.INVALID_SEED, f"Seed \"{seed}\" is too short, must be at least {depth + 1} chars long")
         
         buffer = RingBuffer(depth + 1)
         buffer.fill(seed[-depth - 1:])
@@ -110,6 +110,21 @@ class TextGenerator:
                 next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)[0]
                 buffer.write(next)
                 yield next
-        return generator()
+        
+        class GeneratorWrapper:
+            def __init__(self, gen):
+                self._gen = gen()
+                self._count = 0
+            
+            @property
+            def next(self):
+                self._count += 1
+                return next(self._gen)
+            
+            @property
+            def count(self):
+                return self._count
+
+        return GeneratorWrapper(generator)
 
         
