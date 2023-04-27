@@ -16,11 +16,12 @@ services:
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
-      - CACHE=${MANGLER_ROOT}/cache
     depends_on:
       - redis
+      - textgen
     links:
       - redis
+      - textgen
     networks:
       - mangler-net
   
@@ -38,7 +39,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
-      - CACHE=${MANGLER_ROOT}/cache
+      - CACHE=${MANGLER_CACHE}
     depends_on:
       - redis
       - textgen-worker
@@ -61,7 +62,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
-      - CACHE=${MANGLER_ROOT}/cache
+      - CACHE=${MANGLER_CACHE}
       - ROOT=${MANGLER_ROOT}
     depends_on:
       - redis
@@ -74,6 +75,7 @@ services:
     image: redis
     volumes:
       - redis_data:/data
+    hostname: redis
     networks:
       - mangler-net
   

@@ -51,14 +51,7 @@ class TextGenerator:
 
         logging.info(f"Found {len(files)} source files for {source_id}")
 
-        freq_dict = self.load_cache(source_id)
-        if not freq_dict or not freq_dict.same_dicts(depths):
-            logging.info(f"Creating new freqdict for {source_id}")
-            freq_dict = self.analyze_files(source_id, depths)
-            self.save_cache(freq_dict)
-        else:
-            logging.info(f"Using cached freqdict for {source_id}")
-
+        freq_dict = self.analyze_files(source_id, depths)
         return freq_dict
 
     def analyze_files(self, source_id, depths):
@@ -75,7 +68,6 @@ class TextGenerator:
         return freq_dict
     
     def save_cache(self, freq_dict):
-        logging.info(f"Caching {freq_dict.name}")
         self._serializer.save_cache(freq_dict, self.cache_dir)
     
     def load_cache(self, source_id):

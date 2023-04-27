@@ -8,7 +8,7 @@ ARG PORT=5000
 
 WORKDIR ${MANGLER_ROOT}
 
-COPY requirements.txt .
+COPY requirements/textgen.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .

@@ -95,6 +95,9 @@ class FreqDict:
     
     def same_dicts(self, depths):
         return self.depths == set(depths) 
+    
+    def supports(self, train_depths, gen_depth):
+        return self.depths.issubset(train_depths) and gen_depth in self.depths
 
 
 class FreqDictSerializer:

@@ -5,7 +5,7 @@ ARG MANGLER_ROOT
 
 WORKDIR ${MANGLER_ROOT}
 
-COPY requirements.txt .
+COPY requirements/worker.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .

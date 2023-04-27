@@ -1,7 +1,9 @@
 import os
 
 from flask import Flask, jsonify, request
+from marshmallow import ValidationError
 
+from schema import TextgenSchema
 from tasks import generate_text_task
 
 app = Flask(__name__)
@@ -13,11 +15,14 @@ port = int(os.environ["PORT"])
 
 @app.route("/generate_text", methods=["POST"])
 def generate_text():
-    input_id = request.json["input_id"]
-    depths = request.json["depths"]
-    seed = request.json["seed"]
+    schema = TextgenSchema()
+
+    try:
+        data = schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
     
-    task = generate_text_task.delay(input_id, depths, seed, 10000)
+    task = generate_text_task.delay(data["input_id"], data["train_depths"], data["gen_depth"], data["seed"], data["length"])
 
     return jsonify({"task_id": task.id}), 202
 
