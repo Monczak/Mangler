@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 import redis
+from redis_lock import Lock
 
 
 logger = logging.getLogger("mangler")
@@ -11,6 +12,8 @@ logger = logging.getLogger("mangler")
 
 class CacheManager:
     REDIS_REGEX = re.compile(r"^(?:.*://|)(.*):(.*)/.*$")
+
+    LOCK_TIMEOUT = 60
 
     def __init__(self, path, redis_url):
         self.path = Path(path)
@@ -32,21 +35,27 @@ class CacheManager:
             self._file_name = file_name
             self._mode = mode
             self._file_obj = None
+
+            self._lock = Lock(self._outer.redis, f"cache:{file_name}")
         
-        # TODO: Implement locking with Redis
         def __enter__(self):
-            cache_path = self._outer.path / self._file_name
-            self._exists = cache_path.exists()
+            logger.info(f"Acquiring lock for cache file {self._file_name}")
+            if self._lock.acquire(blocking=True, timeout=self._outer.LOCK_TIMEOUT):
+                cache_path = self._outer.path / self._file_name
+                self._exists = cache_path.exists()
 
-            if not self._exists:
-                open(cache_path, "a").close()
+                if not self._exists:
+                    open(cache_path, "a").close()
 
-            self._file_obj = open(cache_path, mode=self._mode)
-            return self
+                self._file_obj = open(cache_path, mode=self._mode)
+                return self
+            raise TimeoutError(f"Acquiring lock for cache file {self._file_name} timed out")
         
         def __exit__(self, exc_type, exc_value, exc_tb):
             if self._file_obj:
                 self._file_obj.close()
+            if self._lock.locked():
+                self._lock.release()
 
         @property
         def file(self):
@@ -58,8 +67,4 @@ class CacheManager:
         
     def acquire(self, file_name, mode):
         return self.Acquire(self, file_name, mode)
-
-    
-
-
     

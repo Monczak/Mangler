@@ -8,6 +8,7 @@ click-plugins==1.1.1
 click-repl==0.2.0
 kombu==5.2.4
 prompt-toolkit==3.0.38
+python-redis-lock==4.0.0
 pytz==2023.3
 redis==4.5.4
 six==1.16.0

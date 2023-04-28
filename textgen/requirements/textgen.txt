@@ -15,6 +15,7 @@ marshmallow==3.19.0
 packaging==23.1
 pip-autoremove==0.10.0
 prompt-toolkit==3.0.38
+python-redis-lock==4.0.0
 pytz==2023.3
 redis==4.5.4
 six==1.16.0
