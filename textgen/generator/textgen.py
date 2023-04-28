@@ -2,8 +2,11 @@ import logging
 import random
 
 from pathlib import Path
-from .freqdict import FreqDict, FreqDictSerializer, FreqDictSerializerMode
+from .freqdict import FreqDict
 from utils.ringbuffer import RingBuffer
+
+
+logger = logging.getLogger("mangler")
 
 
 class TextgenError(Exception):
@@ -20,13 +23,8 @@ class TextgenError(Exception):
 
 
 class TextGenerator:
-    def __init__(self, source_dir, cache_dir, mode=FreqDictSerializerMode.PICKLE):
+    def __init__(self, source_dir):
         self.source_dir = Path(source_dir)
-        self.cache_dir = Path(cache_dir)
-        self._serializer = FreqDictSerializer(mode)
-
-        if not self.cache_dir.exists():
-            self.cache_dir.mkdir()
 
     def _analyze_text(self, text, depth):
         freq_dict = FreqDict(depths=[depth])
@@ -49,7 +47,7 @@ class TextGenerator:
         if not files:
             raise FileNotFoundError(f"No matches for {source_id}")
 
-        logging.info(f"Found {len(files)} source files for {source_id}")
+        logger.info(f"Found {len(files)} source files for {source_id}")
 
         freq_dict = self.analyze_files(source_id, depths)
         return freq_dict
@@ -66,17 +64,6 @@ class TextGenerator:
         
         freq_dict.normalize()
         return freq_dict
-    
-    def save_cache(self, freq_dict):
-        self._serializer.save_cache(freq_dict, self.cache_dir)
-    
-    def load_cache(self, source_id):
-        files = list(Path.glob(self.cache_dir, f"{source_id}.*"))
-        if not files:
-            return None
-        
-        found_cache = files[0]
-        return FreqDictSerializer.load_cache(found_cache)
 
     def make_generator(self, seed, freq_dict, depth):
         if depth not in freq_dict.depths:

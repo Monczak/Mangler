@@ -64,6 +64,7 @@ services:
       - GENERATED=${MANGLER_GENERATED}
       - CACHE=${MANGLER_CACHE}
       - ROOT=${MANGLER_ROOT}
+      - WORKER=1
     depends_on:
       - redis
     links:

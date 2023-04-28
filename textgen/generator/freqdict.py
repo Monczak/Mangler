@@ -101,11 +101,11 @@ class FreqDict:
 
 
 class FreqDictSerializer:
-    def __init__(self, mode):
+    def __init__(self, mode=FreqDictSerializerMode.PICKLE):
         self.mode = mode
 
     def cache_filename(self, freq_dict):
-        return f"{freq_dict.name}{self.mode.value}"
+        return f"{freq_dict.name}"
 
     def serialize(self, freq_dict):
         dict = {
@@ -121,9 +121,8 @@ class FreqDictSerializer:
             case _:
                 raise AttributeError("invalid serializer")
     
-    @staticmethod
-    def deserialize(bytes, serializer):
-        match serializer:
+    def deserialize(self, bytes):
+        match self.mode:
             case FreqDictSerializerMode.JSON:
                 dict = ujson.loads(bytes.decode(encoding="utf-8"))
             case FreqDictSerializerMode.PICKLE:
@@ -134,13 +133,12 @@ class FreqDictSerializer:
     
     def save_cache(self, freq_dict, dir):
         with open(Path(dir) / self.cache_filename(freq_dict), "wb") as file:
-            file.write(self.serialize(freq_dict))        
+            file.write(self.serialize(freq_dict))
 
-    @staticmethod
-    def load_cache(path):
+    def load_cache(self, path):
         cache_path = Path(path)
         if not cache_path.exists():
             return None
         with open(cache_path, "rb") as file:
-            freq_dict = FreqDictSerializer.deserialize(file.read(), FreqDictSerializerMode(cache_path.suffix))
+            freq_dict = self.deserialize(file.read())
             return freq_dict
