@@ -10,16 +10,27 @@ logger = logging.getLogger("mangler")
 
 
 class TextgenError(Exception):
-    INVALID_DEPTH = 0
-    INVALID_SEED = 1
-
-    def __init__(self, kind, message, *args):
+    def __init__(self, message=None, *args):
         super().__init__(*args)
         self.message = message
-        self.kind = kind
 
     def __str__(self):
         return self.message
+    
+
+class DepthError(TextgenError):
+    pass
+
+
+class SeedError(TextgenError):
+    pass
+
+
+class StuckError(TextgenError):
+    def __init__(self, message=None, current=None, previous=None, *args):
+        super().__init__(message, *args)
+        self.current = current
+        self.previous = previous
 
 
 class TextGenerator:
@@ -67,10 +78,10 @@ class TextGenerator:
 
     def make_generator(self, seed, freq_dict, depth):
         if depth not in freq_dict.depths:
-            raise TextgenError(TextgenError.INVALID_DEPTH, f"Depth {depth} is invalid, must be one of {freq_dict.depths}")
+            raise DepthError(f"Depth {depth} is invalid, must be one of {freq_dict.depths}")
         
         if len(seed) <= depth:
-            raise TextgenError(TextgenError.INVALID_SEED, f"Seed \"{seed}\" is too short, must be at least {depth + 1} chars long")
+            raise SeedError(f"Seed \"{seed}\" is too short, must be at least {depth + 1} chars long")
         
         buffer = RingBuffer(depth + 1)
         buffer.fill(seed[-depth - 1:])
@@ -84,7 +95,7 @@ class TextGenerator:
 
                 if not candidates:
                     # Backtrack and try again?
-                    pass
+                    raise StuckError(current=current, previous=previous)
 
                 next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)[0]
                 buffer.write(next)
