@@ -18,7 +18,7 @@ from tasks import generate_text_task
 
 
 app = Flask(__name__)
-app.config.from_object("flask-config")
+app.config.from_object("flask_config")
 
 host = os.environ["HOST"]
 port = int(os.environ["PORT"])

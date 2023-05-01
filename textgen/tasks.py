@@ -2,25 +2,41 @@ import logging
 import os
 
 from pathlib import Path
+from tomllib import TOMLDecodeError
 
-from celery import Celery, states
+from celery import Celery
 from celery.exceptions import Ignore
+from marshmallow import ValidationError
 
 from cachemanager import CacheManager, CacheLockedError
+from configloader import load_toml
 from generator.textgen import TextGenerator, TextgenError, StuckError
 from generator.freqdict import FreqDictSerializer
+from schema import TextgenConfigSchema
 
 
 logger = logging.getLogger("mangler")
+
+if "WORKER" in os.environ:
+    CONFIG_PATH = "textgen.toml"
+    try:
+        config = load_toml(CONFIG_PATH, TextgenConfigSchema())
+    except FileNotFoundError:
+        logger.error(f"Could not find config file at {CONFIG_PATH}")
+        exit(1)
+    except TOMLDecodeError as err:
+        logger.error(f"Invalid TOML in config file: {str(err)}")
+        exit(1)
+    except ValidationError as err:
+        logger.error("Could not parse config file")
+        for field, msgs in err.messages_dict.items():
+                logger.error(f"{field}: {msgs}")
+        exit(1)
 
 
 celery = Celery(__name__, broker=os.environ["REDIS_URL"], backend=os.environ["REDIS_URL"])
 textgen = TextGenerator(os.environ["UPLOADS"])
 cache_manager = CacheManager(os.environ["CACHE"], os.environ["REDIS_URL"])
-
-
-CACHE_LOCKED_RETRY_TIME = 5
-CACHE_LOCKED_RETRY_MAX_ATTEMPTS = 5
 
 
 class TaskFailure(Exception):
@@ -72,8 +88,8 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
 
         return {"result": "success"}    # TODO: Better success message
     except CacheLockedError as err:
-        logger.warning(f"Cache for {err.file_name} is in use by another task, retrying in {CACHE_LOCKED_RETRY_TIME} seconds")
-        raise self.retry(exc=err, countdown=CACHE_LOCKED_RETRY_TIME, max_retries=CACHE_LOCKED_RETRY_MAX_ATTEMPTS)
+        logger.warning(f"Cache for {err.file_name} is in use by another task, retrying in {config['cache']['retry_delay']} seconds")
+        raise self.retry(exc=err, countdown=config['cache']['retry_delay'], max_retries=config['cache']['cache_locked_retries'])
     except (FileNotFoundError, TextgenError) as err:
         logger.warning(str(err))
         raise Ignore()

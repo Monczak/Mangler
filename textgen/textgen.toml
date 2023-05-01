@@ -1,0 +1,7 @@
+[FreqdictCache]
+
+# Retry the text generation task this many times if the corresponding cache is locked (used by another task)
+CacheLockedRetries = 5
+
+# Wait this many seconds between task retries due to locked cache
+RetryDelay = 5
