@@ -1,14 +1,8 @@
-import logging
+from logger import setup_logger
+
+setup_logger()
+
 import os
-import sys
-
-logger = logging.getLogger("mangler")
-logger.setLevel(logging.DEBUG)
-
-handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter("[%(asctime)s: %(levelname)s/%(module)s] %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 from flask import Flask, jsonify, request
 from marshmallow import ValidationError

@@ -1,36 +1,26 @@
-import logging
 import os
 
 from pathlib import Path
-from tomllib import TOMLDecodeError
 
 from celery import Celery
 from celery.exceptions import Ignore
-from marshmallow import ValidationError
 
 from cachemanager import CacheManager, CacheLockedError
-from configloader import load_toml
+from configloader import parse_toml, ConfigError
 from generator.textgen import TextGenerator, TextgenError, StuckError
 from generator.freqdict import FreqDictSerializer
+from logger import get_logger
 from schema import TextgenConfigSchema
 
 
-logger = logging.getLogger("mangler")
+logger = get_logger()
 
 if "WORKER" in os.environ:
     CONFIG_PATH = "textgen.toml"
     try:
-        config = load_toml(CONFIG_PATH, TextgenConfigSchema())
-    except FileNotFoundError:
-        logger.error(f"Could not find config file at {CONFIG_PATH}")
-        exit(1)
-    except TOMLDecodeError as err:
-        logger.error(f"Invalid TOML in config file: {str(err)}")
-        exit(1)
-    except ValidationError as err:
-        logger.error("Could not parse config file")
-        for field, msgs in err.messages_dict.items():
-                logger.error(f"{field}: {msgs}")
+        config = parse_toml(CONFIG_PATH, TextgenConfigSchema())
+    except ConfigError as err:
+        logger.error(str(err))
         exit(1)
 
 
