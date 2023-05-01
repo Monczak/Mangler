@@ -49,11 +49,18 @@ class TextGenerator:
         return freq_dict
     
     def find_files(self, source_id):
+        """
+        Find files in the source directory that match the specified ID.
+        """
         pattern = f"{source_id}.*"
         files = list(Path.glob(self.source_dir, pattern))
         return files
 
     def analyze(self, source_id, depths):
+        """
+        Analyze files in the source directory that match the specified ID and return a normalized dictionary of letter sequence frequencies.
+        Also check if files are present and valid.
+        """
         files = self.find_files(source_id)
         if not files:
             raise FileNotFoundError(f"No matches for {source_id}")
@@ -64,6 +71,9 @@ class TextGenerator:
         return freq_dict
 
     def analyze_files(self, source_id, depths):
+        """
+        Analyze files in the source directory that match the specified ID and return a normalized dictionary of letter sequence frequencies.
+        """
         freq_dict = FreqDict(name=source_id, depths=depths)
 
         for path in self.find_files(source_id):
@@ -77,6 +87,9 @@ class TextGenerator:
         return freq_dict
 
     def make_generator(self, seed, freq_dict, depth):
+        """
+        Create a text generator from a frequency dictionary.
+        """
         if depth not in freq_dict.depths:
             raise DepthError(f"Depth {depth} is invalid, must be one of {freq_dict.depths}")
         
@@ -94,7 +107,7 @@ class TextGenerator:
                 candidates = freq_dict.successors(current, previous)
 
                 if not candidates:
-                    # Backtrack and try again?
+                    # This can happen if we generate text that was at the end of the original file, wrap around maybe?
                     raise StuckError(current=current, previous=previous)
 
                 next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)[0]

@@ -15,6 +15,8 @@ from schema import TextgenConfigSchema
 
 logger = get_logger()
 
+
+# If we're a Celery worker, parse the config file for the stuff we need
 if "WORKER" in os.environ:
     CONFIG_PATH = "textgen.toml"
     try:
@@ -35,6 +37,10 @@ class TaskFailure(Exception):
 
 @celery.task(bind=True)
 def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
+    """
+    Generate text based on the contents of the files specified by input_id.
+    Use cached data for text generation if available and usable.
+    """
     try:
         with cache_manager.acquire(input_id, "r+b") as cache:
             serializer = FreqDictSerializer()
@@ -64,6 +70,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
             if current_attempt >= max_gen_retries:
                 return {"result": "failed"}     # TODO: Better error message
 
+            # TODO: Maybe save files under random UUIDs to prevent clashing? 
             with open(Path(os.environ["GENERATED"]) / input_id, "w") as file:
                 try:
                     while generator.count < length:
