@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from celery import Celery
-from celery.exceptions import Ignore
+from celery.exceptions import Ignore, SoftTimeLimitExceeded
 
 from cachemanager import CacheManager, CacheLockedError
 from configloader import parse_toml, ConfigError
@@ -16,14 +16,12 @@ from schema import TextgenConfigSchema
 logger = get_logger()
 
 
-# If we're a Celery worker, parse the config file for the stuff we need
-if "WORKER" in os.environ:
-    CONFIG_PATH = "textgen.toml"
-    try:
-        config = parse_toml(CONFIG_PATH, TextgenConfigSchema())
-    except ConfigError as err:
-        logger.error(str(err))
-        exit(1)
+CONFIG_PATH = "textgen.toml"
+try:
+    config = parse_toml(CONFIG_PATH, TextgenConfigSchema())
+except ConfigError as err:
+    logger.error(str(err))
+    exit(1)
 
 
 celery = Celery(__name__, broker=os.environ["REDIS_URL"], backend=os.environ["REDIS_URL"])
@@ -35,7 +33,7 @@ class TaskFailure(Exception):
     pass
 
 
-@celery.task(bind=True)
+@celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"])
 def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     """
     Generate text based on the contents of the files specified by input_id.
@@ -89,6 +87,9 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
         raise self.retry(exc=err, countdown=config['cache']['retry_delay'], max_retries=config['cache']['cache_locked_retries'])
     except (FileNotFoundError, TextgenError) as err:
         logger.warning(str(err))
+        raise Ignore()
+    except SoftTimeLimitExceeded as err:
+        # Do cleanup here
         raise Ignore()
     except Exception as err:
         logger.error(str(err))

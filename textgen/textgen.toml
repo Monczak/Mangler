@@ -5,3 +5,12 @@ CacheLockedRetries = 5
 
 # Wait this many seconds between task retries due to locked cache
 RetryDelay = 5
+
+
+[Tasks]
+
+# Time limit for text generation tasks in seconds
+TimeLimit = 30
+
+# Hard time limit for text generation tasks in seconds - if this gets exceeded, the task is terminated immediately
+HardTimeLimit = 40

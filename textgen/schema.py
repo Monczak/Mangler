@@ -13,6 +13,13 @@ class TextgenCacheConfigSchema(Schema):
     cache_locked_retries = fields.Integer(required=True, data_key="CacheLockedRetries")
     retry_delay = fields.Integer(required=True, data_key="RetryDelay")
 
+
+class TextgenTasksConfigSchema(Schema):
+    soft_time_limit = fields.Integer(required=True, data_key="TimeLimit")
+    time_limit = fields.Integer(required=True, data_key="HardTimeLimit")
+
+
 class TextgenConfigSchema(Schema):
     cache = fields.Nested(TextgenCacheConfigSchema, required=True, data_key="FreqdictCache")
+    tasks = fields.Nested(TextgenTasksConfigSchema, required=True, data_key="Tasks")
 
