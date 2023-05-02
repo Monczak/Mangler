@@ -26,6 +26,14 @@ class SeedError(TextgenError):
     pass
 
 
+class SeedLengthError(SeedError):
+    pass
+
+
+class BadSeedError(SeedError):
+    pass
+
+
 class StuckError(TextgenError):
     def __init__(self, message=None, current=None, previous=None, *args):
         super().__init__(message, *args)
@@ -94,7 +102,10 @@ class TextGenerator:
             raise DepthError(f"Depth {depth} is invalid, must be one of {freq_dict.depths}")
         
         if len(seed) <= depth:
-            raise SeedError(f"Seed \"{seed}\" is too short, must be at least {depth + 1} chars long")
+            raise SeedLengthError(f"Seed \"{seed}\" is too short, must be at least {depth + 1} chars long")
+        
+        if not freq_dict.successors(seed[-1], seed[-depth-1:-1]):
+            raise BadSeedError(f"Cannot start generation with seed \"{seed}\", no successors found")
         
         buffer = RingBuffer(depth + 1)
         buffer.fill(seed[-depth - 1:])

@@ -21,6 +21,8 @@ class TextgenTasksConfigSchema(Schema):
 class TextgenTextGenerationConfigSchema(Schema):
     buffer_size = fields.Integer(required=True, data_key="BufferSize")
     max_gen_retries = fields.Integer(required=True, data_key="MaxGenRetries")
+    max_length = fields.Integer(required=True, data_key="MaxLength")
+    max_depth = fields.Integer(required=True, data_key="MaxDepth")
 
 
 class TextgenConfigSchema(Schema):

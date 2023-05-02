@@ -1,5 +1,7 @@
 import os
+import uuid
 
+from enum import Enum
 from pathlib import Path
 
 from celery import Celery
@@ -7,7 +9,7 @@ from celery.exceptions import Ignore, SoftTimeLimitExceeded
 
 from cachemanager import CacheManager, CacheLockedError
 from configloader import parse_toml, ConfigError
-from generator.textgen import TextGenerator, TextgenError, StuckError
+from generator.textgen import TextGenerator, TextgenError, StuckError, DepthError, SeedLengthError, BadSeedError
 from generator.freqdict import FreqDictSerializer
 from logger import get_logger
 from schema import TextgenConfigSchema
@@ -30,6 +32,29 @@ textgen = TextGenerator(os.environ["UPLOADS"])
 cache_manager = CacheManager(os.environ["CACHE"], os.environ["REDIS_URL"])
 
 
+class Errors(Enum):
+    MAX_RETRIES_EXCEEDED = {"code": 10, "reason": "max retries exceeded"}
+    BAD_SEED = {"code": 11, "reason": "bad seed"}
+    BAD_SEED_LENGTH = {"code": 12, "reason": "invalid seed length"}
+    INVALID_DEPTH = {"code": 13, "reason": "invalid depth"}
+    INVALID_LENGTH = {"code": 14, "reason": "invalid length"}
+    BAD_DEPTH = {"code": 15, "reason": "bad depth"}
+
+    TIMEOUT = {"code": 98, "reason": "timeout"}
+
+    INTERNAL = {"code": 99, "reason": "internal"}
+
+
+class TextgenTaskResult:
+    @staticmethod
+    def success(**kwargs):
+        return {"result": "success", **kwargs}
+    
+    @staticmethod
+    def failure(error=None, **kwargs):
+        return {"result": "failed", **(error.value), **kwargs}
+
+
 class TaskFailure(Exception):
     pass
 
@@ -41,6 +66,17 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     Use cached data for text generation if available and usable.
     """
     try:
+        # Some safety checks to ensure the task's args are nice and valid
+        if any([depth > config["textgen"]["max_depth"] for depth in train_depths]) or gen_depth > config["textgen"]["max_depth"]:
+            return TextgenTaskResult.failure(Errors.INVALID_DEPTH)
+        
+        if length > config["textgen"]["max_length"]:
+            return TextgenTaskResult.failure(Errors.INVALID_LENGTH)
+        
+        if gen_depth not in train_depths:
+            return TextgenTaskResult.failure(Errors.BAD_DEPTH, details=f"Depth {gen_depth} is invalid, must be one of {set(train_depths)}")
+
+        # Actually analyze and generate text
         with cache_manager.acquire(input_id, "r+b") as cache:
             serializer = FreqDictSerializer()
 
@@ -62,15 +98,16 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
         max_gen_retries = config["textgen"]["max_gen_retries"]
         current_attempt = -1
 
-        logger.info(f"Generating {length} characters for {input_id}")
+        out_file_name = str(uuid.uuid4())
+
+        logger.info(f"Generating {length} characters for {input_id}, outfile is {out_file_name}")
         while True:
             generator = textgen.make_generator(seed, freq_dict, gen_depth)
             current_attempt += 1
             if current_attempt >= max_gen_retries:
-                return {"result": "failed"}     # TODO: Better error message
+                return TextgenTaskResult.failure(Errors.MAX_RETRIES_EXCEEDED)
 
-            # TODO: Maybe save files under random UUIDs to prevent clashing? 
-            with open(Path(os.environ["GENERATED"]) / input_id, "w") as file:
+            with open(Path(os.environ["GENERATED"]) / out_file_name, "w") as file:
                 try:
                     while generator.count < length:
                         buffer = "".join([generator.next for _ in range(min(length - generator.count, buffer_size))])
@@ -85,10 +122,16 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
             
             break
 
-        return {"result": "success"}    # TODO: Better success message
+        return TextgenTaskResult.success(output_id=out_file_name)
     except CacheLockedError as err:
         logger.warning(f"Cache for {err.file_name} is in use by another task, retrying in {config['cache']['retry_delay']} seconds")
         raise self.retry(exc=err, countdown=config['cache']['retry_delay'], max_retries=config['cache']['cache_locked_retries'])
+    except BadSeedError as err: # TODO: Consider using self.update_state()
+        return TextgenTaskResult.failure(Errors.BAD_SEED, details=str(err))
+    except SeedLengthError as err:
+        return TextgenTaskResult.failure(Errors.BAD_SEED_LENGTH, details=str(err))
+    except DepthError as err:
+        return TextgenTaskResult.failure(Errors.BAD_DEPTH, details=str(err))
     except (FileNotFoundError, TextgenError) as err:
         logger.warning(str(err))
         raise Ignore()
