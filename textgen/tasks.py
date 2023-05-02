@@ -137,7 +137,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
         raise Ignore()
     except SoftTimeLimitExceeded as err:
         # Do cleanup here
-        raise Ignore()
+        return TextgenTaskResult.failure(Errors.TIMEOUT)
     except Exception as err:
         logger.error(str(err))
         raise TaskFailure(err)
