@@ -18,8 +18,13 @@ class TextgenTasksConfigSchema(Schema):
     soft_time_limit = fields.Integer(required=True, data_key="TimeLimit")
     time_limit = fields.Integer(required=True, data_key="HardTimeLimit")
 
+class TextgenTextGenerationConfigSchema(Schema):
+    buffer_size = fields.Integer(required=True, data_key="BufferSize")
+    max_gen_retries = fields.Integer(required=True, data_key="MaxGenRetries")
+
 
 class TextgenConfigSchema(Schema):
     cache = fields.Nested(TextgenCacheConfigSchema, required=True, data_key="FreqdictCache")
+    textgen = fields.Nested(TextgenTextGenerationConfigSchema, required=True, data_key="TextGeneration")
     tasks = fields.Nested(TextgenTasksConfigSchema, required=True, data_key="Tasks")
 

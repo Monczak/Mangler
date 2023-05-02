@@ -19,6 +19,7 @@ logger = get_logger()
 CONFIG_PATH = "textgen.toml"
 try:
     config = parse_toml(CONFIG_PATH, TextgenConfigSchema())
+    logger.info("Config loaded successfully")
 except ConfigError as err:
     logger.error(str(err))
     exit(1)
@@ -57,8 +58,8 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
             else:
                 logger.info(f"Using cached freqdict for {input_id}")
 
-        buffer_size = 1024
-        max_gen_retries = 10
+        buffer_size = config["textgen"]["buffer_size"]
+        max_gen_retries = config["textgen"]["max_gen_retries"]
         current_attempt = -1
 
         logger.info(f"Generating {length} characters for {input_id}")
@@ -77,6 +78,9 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
                         self.update_state(state="PROGRESS", meta={"current": generator.count, "total": length})
                 except StuckError as err:
                     logger.warning(f"Generator got stuck at pos {generator.count} ({repr(err.previous)}|{repr(err.current)}), retrying ({current_attempt + 1}/{max_gen_retries})")
+                    continue
+                except Exception as err:
+                    logger.error(f"Something went wrong with text generation: {str(err)}")
                     continue
             
             break
