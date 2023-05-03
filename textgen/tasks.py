@@ -59,22 +59,31 @@ class TaskFailure(Exception):
     pass
 
 
+def get_result(task_id):
+    return celery.AsyncResult(task_id)
+
+
 @celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"])
 def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     """
     Generate text based on the contents of the files specified by input_id.
     Use cached data for text generation if available and usable.
     """
+
+    def handle_failure(error, **kwargs):
+        error_data = TextgenTaskResult.failure(error, **kwargs)
+        return error_data
+
     try:
         # Some safety checks to ensure the task's args are nice and valid
         if any([depth > config["textgen"]["max_depth"] for depth in train_depths]) or gen_depth > config["textgen"]["max_depth"]:
-            return TextgenTaskResult.failure(Errors.INVALID_DEPTH)
+            return handle_failure(Errors.INVALID_DEPTH)
         
         if length > config["textgen"]["max_length"]:
-            return TextgenTaskResult.failure(Errors.INVALID_LENGTH)
+            return handle_failure(Errors.INVALID_LENGTH)
         
         if gen_depth not in train_depths:
-            return TextgenTaskResult.failure(Errors.BAD_DEPTH, details=f"Depth {gen_depth} is invalid, must be one of {set(train_depths)}")
+            return handle_failure(Errors.BAD_DEPTH, details=f"Depth {gen_depth} is invalid, must be one of {set(train_depths)}")
 
         # Actually analyze and generate text
         with cache_manager.acquire(input_id, "r+b") as cache:
@@ -112,7 +121,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
                     while generator.count < length:
                         buffer = "".join([generator.next for _ in range(min(length - generator.count, buffer_size))])
                         file.write(buffer)
-                        self.update_state(state="PROGRESS", meta={"current": generator.count, "total": length})
+                        self.update_state(state="GENERATING", meta={"current": generator.count, "total": length})
                 except StuckError as err:
                     logger.warning(f"Generator got stuck at pos {generator.count} ({repr(err.previous)}|{repr(err.current)}), retrying ({current_attempt + 1}/{max_gen_retries})")
                     continue
@@ -126,18 +135,18 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     except CacheLockedError as err:
         logger.warning(f"Cache for {err.file_name} is in use by another task, retrying in {config['cache']['retry_delay']} seconds")
         raise self.retry(exc=err, countdown=config['cache']['retry_delay'], max_retries=config['cache']['cache_locked_retries'])
-    except BadSeedError as err: # TODO: Consider using self.update_state()
-        return TextgenTaskResult.failure(Errors.BAD_SEED, details=str(err))
+    except BadSeedError as err:
+        return handle_failure(Errors.BAD_SEED, details=str(err))
     except SeedLengthError as err:
-        return TextgenTaskResult.failure(Errors.BAD_SEED_LENGTH, details=str(err))
+        return handle_failure(Errors.BAD_SEED_LENGTH, details=str(err))
     except DepthError as err:
-        return TextgenTaskResult.failure(Errors.BAD_DEPTH, details=str(err))
+        return handle_failure(Errors.BAD_DEPTH, details=str(err))
     except (FileNotFoundError, TextgenError) as err:
         logger.warning(str(err))
         raise Ignore()
     except SoftTimeLimitExceeded as err:
         # Do cleanup here
-        return TextgenTaskResult.failure(Errors.TIMEOUT)
+        return handle_failure(Errors.TIMEOUT)
     except Exception as err:
         logger.error(str(err))
         raise TaskFailure(err)

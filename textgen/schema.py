@@ -1,6 +1,10 @@
 from marshmallow import Schema, fields
 
 
+class CheckStatusSchema(Schema):
+    task_id = fields.String(required=True)
+
+
 class TextgenSchema(Schema):
     input_id = fields.String(required=True)
     train_depths = fields.List(fields.Integer(), required=True)
@@ -17,6 +21,7 @@ class TextgenCacheConfigSchema(Schema):
 class TextgenTasksConfigSchema(Schema):
     soft_time_limit = fields.Integer(required=True, data_key="TimeLimit")
     time_limit = fields.Integer(required=True, data_key="HardTimeLimit")
+
 
 class TextgenTextGenerationConfigSchema(Schema):
     buffer_size = fields.Integer(required=True, data_key="BufferSize")
