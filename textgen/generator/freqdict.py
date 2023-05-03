@@ -73,20 +73,20 @@ class FreqDict:
         for letter, prefix, succ in self._all_freqs():
             yield letter, prefix, succ, self.freq(letter, prefix, succ)
 
-    def update(self, current, previous, next, value=1):
+    def update(self, current, prefix, next, value=1):
         """
         Update the dict with new data.
         """
         if current not in self._dict:
             self._dict[current] = {}
         
-        if previous not in self.prefixes(current):
-            self._dict[current][previous] = {}
+        if prefix not in self.prefixes(current):
+            self._dict[current][prefix] = {}
         
-        if next not in self.successors(current, previous):
-            self._dict[current][previous][next] = 1
+        if next not in self.successors(current, prefix):
+            self._dict[current][prefix][next] = 1
         
-        self._dict[current][previous][next] += value
+        self._dict[current][prefix][next] += value
 
     def set(self, current, prefix, next, freq):
         self._dict[current][prefix][next] = freq

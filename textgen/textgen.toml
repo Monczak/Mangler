@@ -7,6 +7,12 @@ CacheLockedRetries = 5
 RetryDelay = 5
 
 
+[TextAnalysis]
+
+# Report progress every this many analysis steps performed
+ProgressStep = 1024
+
+
 [TextGeneration]
 
 # Character buffer size. When the buffer gets full, its contents are flushed to the appropriate output file and task progress is updated.

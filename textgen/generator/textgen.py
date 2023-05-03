@@ -1,9 +1,12 @@
 import logging
 import random
 
+from dataclasses import dataclass, asdict
+
 from pathlib import Path
 from .freqdict import FreqDict
 from utils.ringbuffer import RingBuffer
+from utils.generator_utils import GeneratorWrapper, keep_value
 
 
 logger = logging.getLogger("mangler")
@@ -41,11 +44,23 @@ class StuckError(TextgenError):
         self.previous = previous
 
 
+@dataclass
+class AnalysisProgress:
+    file_current: int
+    file_total: int
+    text_current: int
+    text_total: int
+
+    def dict(self):
+        return asdict(self)
+
+
 class TextGenerator:
     def __init__(self, source_dir):
         self.source_dir = Path(source_dir)
 
-    def _analyze_text(self, text, depth):
+    @keep_value
+    def _make_text_analyzer(self, text, depth):
         freq_dict = FreqDict(depths=[depth])
 
         for i in range(depth, len(text) - 1):
@@ -53,6 +68,10 @@ class TextGenerator:
             prefix = text[i - depth:i]
             next = text[i + 1]
             freq_dict.update(current, prefix, next)
+            yield i, len(text)
+
+        # Wrap around at the end of the text
+        freq_dict.update(current=text[-1], prefix=text[-depth-1:-1], next=text[0])
         
         return freq_dict
     
@@ -64,10 +83,12 @@ class TextGenerator:
         files = list(Path.glob(self.source_dir, pattern))
         return files
 
-    def analyze(self, source_id, depths):
+    @keep_value
+    def make_analyzer(self, source_id, depths):
         """
         Analyze files in the source directory that match the specified ID and return a normalized dictionary of letter sequence frequencies.
         Also check if files are present and valid.
+        Yield progress information and return the freqdict.
         """
         files = self.find_files(source_id)
         if not files:
@@ -75,20 +96,41 @@ class TextGenerator:
 
         logger.info(f"Found {len(files)} source files for {source_id}")
 
-        freq_dict = self.analyze_files(source_id, depths)
+        analyzer = self.make_file_analyzer(source_id, depths)
+        for progress_info in analyzer:
+            yield progress_info
+
+        freq_dict = analyzer.value
         return freq_dict
 
-    def analyze_files(self, source_id, depths):
+    def analyze(self, source_id, depths):
+        """
+        Analyze files in the source directory that match the specified ID and return a normalized dictionary of letter sequence frequencies.
+        Also check if files are present and valid.
+        Ignore progress information.
+        """
+        analyzer = self.make_analyzer(source_id, depths)
+        for _ in analyzer:
+            pass
+        return analyzer.value
+
+    @keep_value
+    def make_file_analyzer(self, source_id, depths):
         """
         Analyze files in the source directory that match the specified ID and return a normalized dictionary of letter sequence frequencies.
         """
         freq_dict = FreqDict(name=source_id, depths=depths)
 
-        for path in self.find_files(source_id):
+        files = self.find_files(source_id)
+        for i in range(len(files)):
+            path = files[i]
             with open(path, "r") as text_file:
                 text = text_file.read()
                 for depth in depths:
-                    sub_dict = self._analyze_text(text, depth)
+                    analyzer = self._make_text_analyzer(text, depth)
+                    for current, total in analyzer:
+                        yield AnalysisProgress(i, len(files), current, total)
+                    sub_dict = analyzer.value
                     freq_dict.merge(sub_dict)
         
         freq_dict.normalize()
@@ -118,27 +160,12 @@ class TextGenerator:
                 candidates = freq_dict.successors(current, previous)
 
                 if not candidates:
-                    # This can happen if we generate text that was at the end of the original file, wrap around maybe?
                     raise StuckError(current=current, previous=previous)
 
                 next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)[0]
                 buffer.write(next)
                 yield next
-        
-        class GeneratorWrapper:
-            def __init__(self, gen):
-                self._gen = gen()
-                self._count = 0
-            
-            @property
-            def next(self):
-                self._count += 1
-                return next(self._gen)
-            
-            @property
-            def count(self):
-                return self._count
 
-        return GeneratorWrapper(generator)
+        return GeneratorWrapper(generator())
 
         

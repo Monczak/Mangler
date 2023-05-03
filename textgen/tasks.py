@@ -90,12 +90,26 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
             serializer = FreqDictSerializer()
 
             freq_dict = None
+            should_create_freqdict = True
             if cache.exists:
-                freq_dict = serializer.deserialize(cache.file.read())
+                try:
+                    freq_dict = serializer.deserialize(cache.file.read())
+                    should_create_freqdict = not freq_dict.supports(train_depths, gen_depth)
+                except EOFError:
+                    logger.warning(f"Cache for {input_id} is corrupted, recreating")
             
-            if not freq_dict or not freq_dict.supports(train_depths, gen_depth):
+            if should_create_freqdict:
                 logger.info(f"Creating new freqdict for {input_id}")
-                freq_dict = textgen.analyze(input_id, train_depths)
+
+                analyzer = textgen.make_analyzer(input_id, train_depths)
+
+                i = 0
+                for progress in analyzer:
+                    if i % config["analysis"]["progress_step"] == 0:
+                        self.update_state(state="ANALYZING", meta=progress.dict())
+                    i += 1
+
+                freq_dict = analyzer.value
 
                 logger.info(f"Caching {freq_dict.name}")
                 cache.file.seek(0)
