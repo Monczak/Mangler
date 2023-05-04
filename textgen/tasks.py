@@ -3,6 +3,7 @@ import uuid
 
 from enum import Enum
 from pathlib import Path
+from time import time
 
 from celery import Celery
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
@@ -61,6 +62,34 @@ class TaskFailure(Exception):
 
 def get_result(task_id):
     return celery.AsyncResult(task_id)
+
+
+###########################
+# Task-specific functions #
+###########################
+
+
+def cleanup(path, min_lifetime, file_lock_manager=None):
+    count = 0
+
+    for file_path in Path(path).glob("*"):
+        if not file_path.is_file():
+            continue
+
+        if time() - file_path.stat().st_mtime < min_lifetime:
+            continue
+
+        if file_lock_manager:
+            with file_lock_manager.acquire(file_path, blocking=True) as cache:
+                if cache.exists:
+                    cache.path.unlink()
+                    count += 1
+        else:
+            file_path.unlink()
+            count += 1
+
+    if count > 0:
+        logger.info(f"Deleted {count} file{'s' if count != 1 else ''}")
 
 
 #########
@@ -188,32 +217,9 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
 
 @celery.task(bind=True)
 def cleanup_cache_task(self):
-    count = 0
-
-    for cache_id in cache_manager.path.glob("*"):
-        if not cache_id.is_file():
-            continue
-
-        with cache_manager.acquire(cache_id, blocking=True) as cache:
-            if cache.exists:
-                cache.path.unlink()
-                count += 1
-
-    if count > 0:
-        logger.info(f"Deleted {count} cache file{'s' if count != 1 else ''}")
+    cleanup(cache_manager.path, config["cleanup"]["cache_min_lifetime"], cache_manager)
 
 
-# TODO: Use FileLockManager to only delete generated files that have been forwarded by the backend (or ones that timed out)
 @celery.task(bind=True)
 def cleanup_generated_task(self):
-    count = 0
-
-    for gen_file in Path(os.environ["GENERATED"]).glob("*"):
-        if not gen_file.is_file():
-            continue
-
-        gen_file.unlink()
-        count += 1
-
-    if count > 0:
-        logger.info(f"Deleted {count} generated text file{'s' if count != 1 else ''}")
+    cleanup(os.environ["GENERATED"], config["cleanup"]["generated_min_lifetime"])
