@@ -13,7 +13,7 @@ app.jinja_env.add_extension("pypugjs.ext.jinja.PyPugJSExtension")
 
 @app.route("/")
 def index():
-    return render_template("index.pug")
+    return render_template("index.pug", static="static")
 
 
 if __name__ == "__main__":
