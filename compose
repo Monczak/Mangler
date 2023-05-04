@@ -11,4 +11,6 @@ export MANGLER_UPLOADS=$MANGLER_ROOT/uploads
 export MANGLER_GENERATED=$MANGLER_ROOT/generated
 export MANGLER_CACHE=$MANGLER_ROOT/cache
 
+export FRONTEND_BUILD_DIR=/usr/src/mangler-build
+
 docker-compose $@

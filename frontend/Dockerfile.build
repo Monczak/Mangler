@@ -1,6 +1,9 @@
+ARG BUILD_ROOT
 FROM node:20-alpine AS build
 
-WORKDIR /app
+ARG BUILD_ROOT
+
+WORKDIR ${BUILD_ROOT}
 
 COPY frontend/package*.json ./
 RUN npm install

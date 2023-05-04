@@ -5,10 +5,12 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile.build
+      args:
+        - BUILD_ROOT=${FRONTEND_BUILD_DIR}
     volumes:
-      - frontend:/app/build
+      - frontend:${FRONTEND_BUILD_DIR}/build
     environment:
-      - BUILD_DIR=/app/build
+      - BUILD_DIR=${FRONTEND_BUILD_DIR}/build
     networks:
       - mangler-net
 
