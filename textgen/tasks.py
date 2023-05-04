@@ -7,7 +7,7 @@ from pathlib import Path
 from celery import Celery
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
 
-from cachemanager import CacheManager, CacheLockedError
+from filelockmanager import FileLockManager, FileLockedError
 from configloader import parse_toml, ConfigError
 from generator.textgen import TextGenerator, TextgenError, StuckError, DepthError, SeedLengthError, BadSeedError
 from generator.freqdict import FreqDictSerializer
@@ -29,7 +29,7 @@ except ConfigError as err:
 
 celery = Celery(__name__, broker=os.environ["REDIS_URL"], backend=os.environ["REDIS_URL"])
 textgen = TextGenerator(os.environ["UPLOADS"])
-cache_manager = CacheManager(os.environ["CACHE"], os.environ["REDIS_URL"])
+cache_manager = FileLockManager(os.environ["CACHE"], os.environ["REDIS_URL"])
 
 
 class Errors(Enum):
@@ -63,6 +63,26 @@ def get_result(task_id):
     return celery.AsyncResult(task_id)
 
 
+#########
+# Tasks #
+#########
+
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        config["cleanup"]["cache_cleanup_interval"],
+        cleanup_cache_task,
+        name="cleanup cache"
+    )
+
+    sender.add_periodic_task(
+        config["cleanup"]["generated_cleanup_interval"],
+        cleanup_generated_task,
+        name="cleanup generated files"
+    )
+
+
 @celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"])
 def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     """
@@ -76,17 +96,17 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
 
     try:
         # Some safety checks to ensure the task's args are nice and valid
-        if any([depth > config["textgen"]["max_depth"] for depth in train_depths]) or gen_depth > config["textgen"]["max_depth"]:
+        if any([not 0 < depth <= config["textgen"]["max_depth"] for depth in train_depths]) or gen_depth > config["textgen"]["max_depth"]:
             return handle_failure(Errors.INVALID_DEPTH)
         
-        if length > config["textgen"]["max_length"]:
+        if not 0 < length <= config["textgen"]["max_length"]:
             return handle_failure(Errors.INVALID_LENGTH)
         
         if gen_depth not in train_depths:
             return handle_failure(Errors.BAD_DEPTH, details=f"Depth {gen_depth} is invalid, must be one of {set(train_depths)}")
 
         # Actually analyze and generate text
-        with cache_manager.acquire(input_id, "r+b") as cache:
+        with cache_manager.acquire_open(input_id, "r+b") as cache:
             serializer = FreqDictSerializer()
 
             freq_dict = None
@@ -146,7 +166,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
             break
 
         return TextgenTaskResult.success(output_id=out_file_name)
-    except CacheLockedError as err:
+    except FileLockedError as err:
         logger.warning(f"Cache for {err.file_name} is in use by another task, retrying in {config['cache']['retry_delay']} seconds")
         raise self.retry(exc=err, countdown=config['cache']['retry_delay'], max_retries=config['cache']['cache_locked_retries'])
     except BadSeedError as err:
@@ -164,4 +184,36 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     except Exception as err:
         logger.error(str(err))
         raise TaskFailure(err)
-    
+
+
+@celery.task(bind=True)
+def cleanup_cache_task(self):
+    count = 0
+
+    for cache_id in cache_manager.path.glob("*"):
+        if not cache_id.is_file():
+            continue
+
+        with cache_manager.acquire(cache_id, blocking=True) as cache:
+            if cache.exists:
+                cache.path.unlink()
+                count += 1
+
+    if count > 0:
+        logger.info(f"Deleted {count} cache file{'s' if count != 1 else ''}")
+
+
+# TODO: Use FileLockManager to only delete generated files that have been forwarded by the backend (or ones that timed out)
+@celery.task(bind=True)
+def cleanup_generated_task(self):
+    count = 0
+
+    for gen_file in Path(os.environ["GENERATED"]).glob("*"):
+        if not gen_file.is_file():
+            continue
+
+        gen_file.unlink()
+        count += 1
+
+    if count > 0:
+        logger.info(f"Deleted {count} generated text file{'s' if count != 1 else ''}")

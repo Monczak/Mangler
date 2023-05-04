@@ -43,7 +43,7 @@ def check_status():
     
     task_result = get_result(data["task_id"])
     state = task_result.state
-    state_info = task_result.info if state in ("ANALYZING", "GENERATING") else None
+    state_info = task_result.info if state in ("ANALYZING", "GENERATING") else None     # TODO: Refactor constant state names out of here
 
     # Catch any exception the task potentially raised, because get() reraises exceptions
     try:

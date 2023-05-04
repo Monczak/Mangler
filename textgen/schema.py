@@ -34,9 +34,15 @@ class TextgenTextGenerationConfigSchema(Schema):
     max_depth = fields.Integer(required=True, data_key="MaxDepth")
 
 
+class TextgenCleanupConfigSchema(Schema):
+    cache_cleanup_interval = fields.Integer(required=True, data_key="CacheCleanupInterval")
+    generated_cleanup_interval = fields.Integer(required=True, data_key="GeneratedCleanupInterval")
+
+
 class TextgenConfigSchema(Schema):
     cache = fields.Nested(TextgenCacheConfigSchema, required=True, data_key="FreqdictCache")
     analysis = fields.Nested(TextgenTextAnalysisConfigSchema, required=True, data_key="TextAnalysis")
     textgen = fields.Nested(TextgenTextGenerationConfigSchema, required=True, data_key="TextGeneration")
     tasks = fields.Nested(TextgenTasksConfigSchema, required=True, data_key="Tasks")
+    cleanup = fields.Nested(TextgenCleanupConfigSchema, required=True, data_key = "Cleanup")
 

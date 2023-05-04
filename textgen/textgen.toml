@@ -35,3 +35,12 @@ TimeLimit = 30
 
 # Hard time limit for text generation tasks in seconds. If this gets exceeded, the task is terminated immediately.
 HardTimeLimit = 40
+
+
+[Cleanup]
+
+# Cache files will be removed every this many seconds
+CacheCleanupInterval = 120 
+
+# Generated files will be removed every this many seconds
+GeneratedCleanupInterval = 120

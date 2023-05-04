@@ -71,6 +71,29 @@ services:
       - redis
     networks:
       - mangler-net
+
+  textgen-beat:
+    build:
+      context: ./textgen
+      dockerfile: Dockerfile.beat
+      args:
+        - MANGLER_ROOT=${MANGLER_ROOT}
+    volumes:
+      - uploads:${MANGLER_UPLOADS}
+      - generated:${MANGLER_GENERATED}
+      - cache:${MANGLER_ROOT}/cache
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - UPLOADS=${MANGLER_UPLOADS}
+      - GENERATED=${MANGLER_GENERATED}
+      - CACHE=${MANGLER_CACHE}
+      - ROOT=${MANGLER_ROOT}
+    depends_on:
+      - redis
+    links:
+      - redis
+    networks:
+      - mangler-net
   
   redis:
     image: redis
