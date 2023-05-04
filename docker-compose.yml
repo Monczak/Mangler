@@ -1,6 +1,17 @@
 version: '3.9'
 
 services:
+  frontend-build:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.build
+    volumes:
+      - frontend:/app/build
+    environment:
+      - BUILD_DIR=/app/build
+    networks:
+      - mangler-net
+
   backend:
     build:
       context: ./backend
@@ -12,11 +23,17 @@ services:
     volumes:
       - uploads:${MANGLER_UPLOADS}
       - generated:${MANGLER_GENERATED}
+      - frontend:${MANGLER_ROOT}/frontend
     environment:
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
+      - FRONTEND=${MANGLER_ROOT}/frontend
+
+      # Remove this for production!
+      - DEBUG=1
     depends_on:
+      - frontend-build
       - redis
       - textgen
     links:
@@ -108,6 +125,7 @@ volumes:
   generated:
   cache:
   redis_data:
+  frontend:
 
 networks:
   mangler-net:

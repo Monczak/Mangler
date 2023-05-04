@@ -1,0 +1,11 @@
+{
+  "name": "mangler-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Mangler",
+  "scripts": {
+    "build": "source build.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}

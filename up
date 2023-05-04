@@ -1,13 +1,3 @@
 #!/bin/bash
 
-cp .dockerignore backend/
-cp .dockerignore textgen/
-
-export REDIS_URL=redis://redis:6379/0
-
-export MANGLER_ROOT=/usr/src/mangler
-export MANGLER_UPLOADS=$MANGLER_ROOT/uploads
-export MANGLER_GENERATED=$MANGLER_ROOT/generated
-export MANGLER_CACHE=$MANGLER_ROOT/cache
-
-docker-compose up $@
+./compose up $@
