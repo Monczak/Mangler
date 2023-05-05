@@ -4,6 +4,8 @@ setup_logger()
 
 import os
 
+import states
+
 from flask import Flask, jsonify, request
 from marshmallow import ValidationError
 
@@ -43,20 +45,20 @@ def check_status():
     
     task_result = get_result(data["task_id"])
     state = task_result.state
-    state_info = task_result.info if state in ("ANALYZING", "GENERATING") else None     # TODO: Refactor constant state names out of here
+    state_info = task_result.info if state in (states.ANALYZING, states.GENERATING) else None     # TODO: Refactor constant state names out of here
 
     # Catch any exception the task potentially raised, because get() reraises exceptions
     try:
-        result = task_result.get() if state in ("SUCCESS", "FAILURE") else None
-        real_state = "FAILURE" if result and result["result"] != "success" else state
+        result = task_result.get() if state in (states.SUCCESS, states.FAILURE) else None
+        real_state = states.FAILURE if result and result["result"] != "success" else state
     except Exception as err:
         result = None
-        real_state = "INTERNAL_ERROR"
+        real_state = states.INTERNAL_ERROR
 
     return jsonify({"state": real_state, 
                     "state_info": state_info, 
                     "result": None if not result else {key: value for key, value in result.items() if key != "result"}}
-                    ), 200
+                    ), 200 if real_state not in (states.FAILURE, states.INTERNAL_ERROR) else 400
 
 
 if __name__ == "__main__":

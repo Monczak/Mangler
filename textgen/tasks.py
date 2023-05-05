@@ -1,6 +1,8 @@
 import os
 import uuid
 
+import states
+
 from enum import Enum
 from pathlib import Path
 from time import time
@@ -155,7 +157,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
                 i = 0
                 for progress in analyzer:
                     if i % config["analysis"]["progress_step"] == 0:
-                        self.update_state(state="ANALYZING", meta=progress.dict())
+                        self.update_state(state=states.ANALYZING, meta=progress.dict())
                     i += 1
 
                 freq_dict = analyzer.value
@@ -184,7 +186,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
                     while generator.count < length:
                         buffer = "".join([generator.next for _ in range(min(length - generator.count, buffer_size))])
                         file.write(buffer)
-                        self.update_state(state="GENERATING", meta={"current": generator.count, "total": length})
+                        self.update_state(state=states.GENERATING, meta={"current": generator.count, "total": length})
                 except StuckError as err:
                     logger.warning(f"Generator got stuck at pos {generator.count} ({repr(err.previous)}|{repr(err.current)}), retrying ({current_attempt + 1}/{max_gen_retries})")
                     continue
