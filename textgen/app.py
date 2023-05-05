@@ -45,7 +45,7 @@ def check_status():
     
     task_result = get_result(data["task_id"])
     state = task_result.state
-    state_info = task_result.info if state in (states.ANALYZING, states.GENERATING) else None     # TODO: Refactor constant state names out of here
+    state_info = task_result.info if state in (states.ANALYZING, states.GENERATING) else None
 
     # Catch any exception the task potentially raised, because get() reraises exceptions
     try:
@@ -58,7 +58,12 @@ def check_status():
     return jsonify({"state": real_state, 
                     "state_info": state_info, 
                     "result": None if not result else {key: value for key, value in result.items() if key != "result"}}
-                    ), 200 if real_state not in (states.FAILURE, states.INTERNAL_ERROR) else 400
+                    ), \
+                        200 if real_state in (states.SUCCESS) else \
+                        202 if real_state in (states.ANALYZING, states.GENERATING) else \
+                        400 if real_state in (states.FAILURE) else \
+                        404 if real_state in (states.PENDING) else \
+                        500
 
 
 if __name__ == "__main__":
