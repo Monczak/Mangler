@@ -82,7 +82,7 @@ def cleanup(path, min_lifetime, file_lock_manager=None):
             continue
 
         if file_lock_manager:
-            with file_lock_manager.acquire(file_path, blocking=True) as cache:
+            with file_lock_manager.acquire(file_path.name, blocking=True) as cache:
                 if cache.exists:
                     cache.path.unlink()
                     count += 1
