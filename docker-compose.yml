@@ -20,8 +20,9 @@ services:
       dockerfile: Dockerfile
       args:
         - MANGLER_ROOT=${MANGLER_ROOT}
+        - PORT=${MANGLER_BACKEND_PORT}
     ports:
-      - 5000:5000
+      - ${MANGLER_PORT}:${MANGLER_BACKEND_PORT}
     volumes:
       - uploads:${MANGLER_UPLOADS}
       - generated:${MANGLER_GENERATED}
