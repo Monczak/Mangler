@@ -10,6 +10,7 @@ services:
     volumes:
       - frontend:${FRONTEND_BUILD_DIR}/build
     environment:
+      - VERSION=${MANGLER_VERSION}
       - BUILD_DIR=${FRONTEND_BUILD_DIR}/build
     networks:
       - mangler-net
@@ -28,6 +29,7 @@ services:
       - generated:${MANGLER_GENERATED}
       - frontend:${MANGLER_ROOT}/frontend
     environment:
+      - VERSION=${MANGLER_VERSION}
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
@@ -56,6 +58,7 @@ services:
       - generated:${MANGLER_GENERATED}
       - cache:${MANGLER_ROOT}/cache
     environment:
+      - VERSION=${MANGLER_VERSION}
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
@@ -79,6 +82,7 @@ services:
       - generated:${MANGLER_GENERATED}
       - cache:${MANGLER_ROOT}/cache
     environment:
+      - VERSION=${MANGLER_VERSION}
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
@@ -103,6 +107,7 @@ services:
       - generated:${MANGLER_GENERATED}
       - cache:${MANGLER_ROOT}/cache
     environment:
+      - VERSION=${MANGLER_VERSION}
       - REDIS_URL=${REDIS_URL}
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}

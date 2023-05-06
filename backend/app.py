@@ -11,11 +11,12 @@ app.jinja_env.add_extension("pypugjs.ext.jinja.PyPugJSExtension")
 
 host = os.environ["HOST"]
 port = int(os.environ["PORT"])
+version = os.environ["VERSION"]
 
 
 @app.route("/")
 def index():
-    return render_template("index.pug", static="static")
+    return render_template("index.pug", static="static", version=version)
 
 
 if __name__ == "__main__":

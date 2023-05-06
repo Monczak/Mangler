@@ -1,0 +1,22 @@
+body {
+    background: rgb(24, 21, 26);
+    color: #f9f1fc;
+}
+
+a {
+    color: #7d7280;
+    text-decoration: none;
+}
+
+.footer {
+    margin-bottom: 30px;
+    color: #58515a;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.unselectable {
+    user-select: none;
+}

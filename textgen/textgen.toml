@@ -40,13 +40,13 @@ HardTimeLimit = 40
 [Cleanup]
 
 # Cache files will be removed every this many seconds
-CacheCleanupInterval = 120
+CacheCleanupInterval = 1200
 
 # Only cache files older than this many seconds will be removed
 CacheMinLifetime = 300
 
 # Generated files will be removed every this many seconds
-GeneratedCleanupInterval = 120
+GeneratedCleanupInterval = 1200
 
 # Only generated files older than this many seconds will be removed
 GeneratedMinLifetime = 300

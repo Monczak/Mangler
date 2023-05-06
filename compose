@@ -4,6 +4,8 @@ cp .dockerignore backend/
 cp .dockerignore textgen/
 cp .dockerignore frontend/
 
+export MANGLER_VERSION="0.1.0"
+
 export REDIS_URL=redis://redis:6379/0
 
 export MANGLER_ROOT=/usr/src/mangler

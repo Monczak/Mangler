@@ -1,9 +1,9 @@
-doctype html
+extends layout/base
 
-html(lang="en")
-    head 
-        title Test
-    body 
-        p Hello World from Pug!
-    
-    script(src=static+"/js/index.js") 
+block content
+    .container
+        include layout/navbar
+
+        p Hello World!
+
+        include layout/footer
