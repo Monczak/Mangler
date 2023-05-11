@@ -1,0 +1,12 @@
+[RateLimits]
+
+# Rate limit for the /upload endpoint
+Upload = "10/minute"
+
+[FileLimits]
+
+# Max file count in upload request
+UploadFileCount = 10
+
+# Max total file size that can be uploaded
+MaxFileSize = 20971520  # 20 MiB

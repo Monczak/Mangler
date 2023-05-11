@@ -11,10 +11,10 @@ from celery import Celery
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
 
 from common.configloader import parse_toml, ConfigError
+from common.logger import get_logger
 from filelockmanager import FileLockManager, FileLockedError
 from generator.textgen import TextGenerator, TextgenError, StuckError, DepthError, SeedLengthError, BadSeedError
 from generator.freqdict import FreqDictSerializer
-from logger import get_logger
 from schema import TextgenConfigSchema
 
 

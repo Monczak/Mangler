@@ -1,5 +1,4 @@
-from logger import setup_logger
-
+from common.logger import setup_logger
 setup_logger()
 
 import os

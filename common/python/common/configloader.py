@@ -3,6 +3,9 @@ from tomllib import loads, TOMLDecodeError
 from marshmallow import ValidationError
 
 
+current_config = None
+
+
 class ConfigError(Exception):
     def __init__(self, message=None):
         self.message = message
@@ -19,9 +22,10 @@ def load_toml(path, schema):
 
 
 def parse_toml(path, schema):
+    global current_config
     try:
-        config = load_toml(path, schema)
-        return config
+        current_config = load_toml(path, schema)
+        return current_config
     except FileNotFoundError:
         raise ConfigError(f"Could not find config file at {path}")
     except TOMLDecodeError as err:
