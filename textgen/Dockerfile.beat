@@ -5,9 +5,15 @@ ARG MANGLER_ROOT
 
 WORKDIR ${MANGLER_ROOT}
 
-COPY requirements/worker.txt requirements.txt
+COPY textgen/requirements/worker.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY textgen/ .
+
+ARG COMMON_PATH=${MANGLER_ROOT}/common/
+COPY common/python/ ${COMMON_PATH}
+WORKDIR ${COMMON_PATH}
+RUN pip install --no-cache-dir .
+WORKDIR ${MANGLER_ROOT}
 
 ENTRYPOINT ./beat.sh

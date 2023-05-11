@@ -10,8 +10,8 @@ from time import time
 from celery import Celery
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
 
+from common.configloader import parse_toml, ConfigError
 from filelockmanager import FileLockManager, FileLockedError
-from configloader import parse_toml, ConfigError
 from generator.textgen import TextGenerator, TextgenError, StuckError, DepthError, SeedLengthError, BadSeedError
 from generator.freqdict import FreqDictSerializer
 from logger import get_logger

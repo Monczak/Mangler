@@ -17,8 +17,8 @@ services:
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
       args:
         - MANGLER_ROOT=${MANGLER_ROOT}
         - PORT=${MANGLER_BACKEND_PORT}
@@ -49,8 +49,8 @@ services:
   
   textgen:
     build:
-      context: ./textgen
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: textgen/Dockerfile
       args:
         - MANGLER_ROOT=${MANGLER_ROOT}
     volumes:
@@ -73,8 +73,8 @@ services:
 
   textgen-worker:
     build:
-      context: ./textgen
-      dockerfile: Dockerfile.worker
+      context: .
+      dockerfile: textgen/Dockerfile.worker
       args:
         - MANGLER_ROOT=${MANGLER_ROOT}
     volumes:
@@ -98,8 +98,8 @@ services:
 
   textgen-beat:
     build:
-      context: ./textgen
-      dockerfile: Dockerfile.beat
+      context: .
+      dockerfile: textgen/Dockerfile.beat
       args:
         - MANGLER_ROOT=${MANGLER_ROOT}
     volumes:

@@ -18,7 +18,7 @@ UPLOAD_DIR = Path(os.environ["UPLOADS"])
 
 
 @api.route("/upload", methods=["POST"])
-@limiter.limit("10/minute")
+@limiter.limit("10/minute") # TODO: Load this from a config file
 def upload():
     file_id = uuid.uuid4()
 

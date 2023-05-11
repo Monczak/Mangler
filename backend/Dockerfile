@@ -12,9 +12,16 @@ WORKDIR ${ROOT}
 ENV HOST=${HOST}
 ENV PORT=${PORT}
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+ARG COMMON_PATH=${MANGLER_ROOT}/common/
+COPY common/python/ ${COMMON_PATH}
+WORKDIR ${COMMON_PATH}
+RUN pip install --no-cache-dir .
+WORKDIR ${MANGLER_ROOT}
+
+COPY backend/ .
+
 
 CMD ["python", "app.py"]
