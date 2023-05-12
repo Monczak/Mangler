@@ -19,7 +19,7 @@ host = os.environ["HOST"]
 port = int(os.environ["PORT"])
 
 
-@app.route("/generate_text", methods=["POST"])
+@app.route("/generate-text", methods=["POST"])
 def generate_text():
     schema = TextgenSchema()
 
@@ -33,7 +33,7 @@ def generate_text():
     return jsonify({"task_id": task.id}), 202
 
 
-@app.route("/check_status", methods=["GET"])
+@app.route("/check-status", methods=["GET"])
 def check_status():
     schema = CheckStatusSchema()
 

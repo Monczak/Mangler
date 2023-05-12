@@ -31,6 +31,7 @@ services:
     environment:
       - VERSION=${MANGLER_VERSION}
       - REDIS_URL=${REDIS_URL}
+      - TEXTGEN_URL=textgen:5000
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
       - FRONTEND=${MANGLER_ROOT}/frontend
