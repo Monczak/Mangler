@@ -3,6 +3,6 @@
 chown -R nobody:nogroup $ROOT
 
 celery -A tasks.celery worker \
-       -Q textgen \
+       -Q backend \
        --loglevel=info \
        --uid=nobody --gid=nogroup

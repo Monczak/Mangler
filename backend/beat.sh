@@ -2,7 +2,6 @@
 
 chown -R nobody:nogroup $ROOT
 
-celery -A tasks.celery worker \
-       -Q textgen \
+celery -A tasks.celery beat \
        --loglevel=info \
        --uid=nobody --gid=nogroup

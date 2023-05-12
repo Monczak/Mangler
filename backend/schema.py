@@ -10,6 +10,14 @@ class BackendFileLimitConfigSchema(Schema):
     max_file_size = fields.Integer(required=True, data_key="MaxFileSize")
 
 
+class BackendCleanupConfigSchema(Schema):
+    uploads_cleanup_interval = fields.Integer(required=True, data_key="UploadsCleanupInterval")
+    uploads_min_lifetime = fields.Integer(required=True, data_key="UploadsMinLifetime")
+    generated_cleanup_interval = fields.Integer(required=False, data_key="GeneratedCleanupInterval")
+    generated_min_lifetime = fields.Integer(required=False, data_key="GeneratedMinLifetime")
+
+
 class BackendConfigSchema(Schema):
     rate_limits = fields.Nested(BackendRateLimitConfigSchema, required=True, data_key="RateLimits")
     file_limits = fields.Nested(BackendFileLimitConfigSchema, required=True, data_key="FileLimits")
+    cleanup = fields.Nested(BackendCleanupConfigSchema, required=True, data_key="Cleanup")

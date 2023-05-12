@@ -42,11 +42,73 @@ services:
       - frontend-build
       - redis
       - textgen
+      - backend-worker
+      - backend-beat
     links:
       - redis
       - textgen
     networks:
       - mangler-net
+    stop_signal: SIGINT
+
+  backend-worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.worker
+      args:
+        - MANGLER_ROOT=${MANGLER_ROOT}
+        - PORT=${MANGLER_BACKEND_PORT}
+    volumes:
+      - uploads:${MANGLER_UPLOADS}
+      - generated:${MANGLER_GENERATED}
+    environment:
+      - VERSION=${MANGLER_VERSION}
+      - REDIS_URL=${REDIS_URL}
+      - TEXTGEN_URL=textgen:5000
+      - UPLOADS=${MANGLER_UPLOADS}
+      - GENERATED=${MANGLER_GENERATED}
+      - WORKER=1
+
+      # Remove this for production!
+      - DEBUG=1
+    depends_on:
+      - redis
+      - textgen
+    links:
+      - redis
+      - textgen
+    networks:
+      - mangler-net
+
+  backend-beat:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.beat
+      args:
+        - MANGLER_ROOT=${MANGLER_ROOT}
+        - PORT=${MANGLER_BACKEND_PORT}
+    volumes:
+      - uploads:${MANGLER_UPLOADS}
+      - generated:${MANGLER_GENERATED}
+    environment:
+      - VERSION=${MANGLER_VERSION}
+      - REDIS_URL=${REDIS_URL}
+      - TEXTGEN_URL=textgen:5000
+      - UPLOADS=${MANGLER_UPLOADS}
+      - GENERATED=${MANGLER_GENERATED}
+      - WORKER=1
+
+      # Remove this for production!
+      - DEBUG=1
+    depends_on:
+      - redis
+      - textgen
+    links:
+      - redis
+      - textgen
+    networks:
+      - mangler-net
+    stop_signal: SIGINT
   
   textgen:
     build:
@@ -71,6 +133,7 @@ services:
       - redis
     networks:
       - mangler-net
+    stop_signal: SIGINT
 
   textgen-worker:
     build:
@@ -120,6 +183,7 @@ services:
       - redis
     networks:
       - mangler-net
+    stop_signal: SIGINT
   
   redis:
     image: redis

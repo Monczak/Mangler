@@ -31,6 +31,7 @@ except ConfigError as err:
 
 
 celery = Celery(__name__, broker=os.environ["REDIS_URL"], backend=os.environ["REDIS_URL"])
+celery.config_from_object("celeryconfig")
 textgen = TextGenerator(os.environ["UPLOADS"])
 cache_manager = FileLockManager(os.environ["CACHE"], os.environ["REDIS_URL"])
 
@@ -115,7 +116,7 @@ def setup_periodic_tasks(sender, **kwargs):
         )
 
 
-@celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"])
+@celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"], queue="textgen")
 def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
     """
     Generate text based on the contents of the files specified by input_id.
@@ -218,11 +219,11 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
         raise TaskFailure(err)
 
 
-@celery.task(bind=True)
+@celery.task(bind=True, queue="textgen")
 def cleanup_cache_task(self):
     cleanup(cache_manager.path, config["cleanup"]["cache_min_lifetime"], cache_manager)
 
 
-@celery.task(bind=True)
+@celery.task(bind=True, queue="textgen")
 def cleanup_generated_task(self):
     cleanup(os.environ["GENERATED"], config["cleanup"]["generated_min_lifetime"])
