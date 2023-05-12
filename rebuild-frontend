@@ -1,3 +1,4 @@
 #!/bin/bash
 
 ./compose run --build --rm frontend-build
+./compose restart backend

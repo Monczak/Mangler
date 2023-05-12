@@ -1,16 +1,17 @@
 body {
-    background: rgb(24, 21, 26);
+    background: rgb(24,16,36);
+    background-attachment: fixed;
     color: #f9f1fc;
 }
 
 a {
-    color: #7d7280;
+    color: #876b8f;
     text-decoration: none;
 }
 
 .footer {
     margin-bottom: 30px;
-    color: #58515a;
+    color: #705f74;
 }
 
 .text-right {
@@ -19,4 +20,26 @@ a {
 
 .unselectable {
     user-select: none;
+}
+
+.margin-bottom {
+    margin-bottom: 30px;
+}
+
+.panel {
+    background: rgb(45, 30, 68);
+    border-radius: 25px;
+}
+
+.form-control {
+    background: rgb(64, 44, 95);
+    color: #f9f1fc;
+    border: transparent;
+}
+
+.form-control:focus {
+    background: rgb(76, 51, 112);
+    color: #f9f1fc;
+    border: transparent;
+    box-shadow: none;
 }
