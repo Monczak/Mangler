@@ -107,11 +107,12 @@ def setup_periodic_tasks(sender, **kwargs):
         name="cleanup cache"
     )
 
-    sender.add_periodic_task(
-        config["cleanup"]["generated_cleanup_interval"],
-        cleanup_generated_task,
-        name="cleanup generated files"
-    )
+    if "generated_cleanup_interval" in config["cleanup"] and "generated_min_lifetime" in config["cleanup"]:
+        sender.add_periodic_task(
+            config["cleanup"]["generated_cleanup_interval"],
+            cleanup_generated_task,
+            name="cleanup generated files"
+        )
 
 
 @celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"])

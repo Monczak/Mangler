@@ -37,8 +37,8 @@ class TextgenTextGenerationConfigSchema(Schema):
 class TextgenCleanupConfigSchema(Schema):
     cache_cleanup_interval = fields.Integer(required=True, data_key="CacheCleanupInterval")
     cache_min_lifetime = fields.Integer(required=True, data_key="CacheMinLifetime")
-    generated_cleanup_interval = fields.Integer(required=True, data_key="GeneratedCleanupInterval")
-    generated_min_lifetime = fields.Integer(required=True, data_key="GeneratedMinLifetime")
+    generated_cleanup_interval = fields.Integer(required=False, data_key="GeneratedCleanupInterval")
+    generated_min_lifetime = fields.Integer(required=False, data_key="GeneratedMinLifetime")
 
 
 class TextgenConfigSchema(Schema):

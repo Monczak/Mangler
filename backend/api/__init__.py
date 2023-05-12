@@ -64,4 +64,4 @@ def get_text(text_id):
     
     with open(path, "r") as file:
         text = file.read()
-    return text
+    return text, 200

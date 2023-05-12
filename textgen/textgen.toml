@@ -46,7 +46,7 @@ CacheCleanupInterval = 1200
 CacheMinLifetime = 300
 
 # Generated files will be removed every this many seconds
-GeneratedCleanupInterval = 1200
+# GeneratedCleanupInterval = 1200
 
 # Only generated files older than this many seconds will be removed
-GeneratedMinLifetime = 300
+# GeneratedMinLifetime = 300
