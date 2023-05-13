@@ -1,5 +1,20 @@
 #!/bin/bash
 
+if [[ -z "$DIST_DIR" ]]; then
+    echo "Error: DIST_DIR is not set"
+    exit 1
+fi
+
+if [[ "$DIST_DIR" == "/" ]]; then
+    echo "Error: DIST_DIR cannot be root directory"
+    exit 1
+fi
+
+if [[ "$DIST_DIR" == "." ]]; then
+    echo "Error: DIST_DIR cannot be current directory"
+    exit 1
+fi
+
 if [[ -z "$BUILD_DIR" ]]; then
     echo "Error: BUILD_DIR is not set"
     exit 1
@@ -16,14 +31,15 @@ if [[ "$BUILD_DIR" == "." ]]; then
 fi
 
 rm -rf "$BUILD_DIR/*"
+rm -rf "$DIST_DIR/*"
 
 mkdir -p $BUILD_DIR
-mkdir -p $BUILD_DIR/static
-mkdir -p $BUILD_DIR/templates
-
-cp -a src/static/css/. $BUILD_DIR/static/css
-cp -a src/static/img/. $BUILD_DIR/static/img
-cp -a src/static/js/. $BUILD_DIR/static/js
-cp -a src/templates/. $BUILD_DIR/templates/
+mkdir -p $DIST_DIR
+mkdir -p $DIST_DIR/static
+mkdir -p $DIST_DIR/templates
 
 tsc
+npx webpack
+
+cp -a src/static/. $DIST_DIR/static/
+cp -a src/templates/. $DIST_DIR/templates/
