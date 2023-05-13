@@ -38,7 +38,6 @@ mkdir -p $DIST_DIR
 mkdir -p $DIST_DIR/static
 mkdir -p $DIST_DIR/templates
 
-tsc
 npx webpack
 
 cp -a src/static/. $DIST_DIR/static/
