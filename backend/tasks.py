@@ -69,11 +69,11 @@ def setup_periodic_tasks(sender, **kwargs):
     )
 
 
-@celery.task(bind=True, queue="backend")
+@celery.task(bind=True, queue="backend", ignore_result=True)
 def cleanup_uploads_task(self):
     cleanup(UPLOADS_PATH, config["cleanup"]["uploads_min_lifetime"])
 
 
-@celery.task(bind=True, queue="backend")
+@celery.task(bind=True, queue="backend", ignore_result=True)
 def cleanup_generated_task(self):
     cleanup(GENERATED_PATH, config["cleanup"]["generated_min_lifetime"])

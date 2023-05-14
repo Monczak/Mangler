@@ -219,11 +219,11 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
         raise TaskFailure(err)
 
 
-@celery.task(bind=True, queue="textgen")
+@celery.task(bind=True, queue="textgen", ignore_result=True)
 def cleanup_cache_task(self):
     cleanup(cache_manager.path, config["cleanup"]["cache_min_lifetime"], cache_manager)
 
 
-@celery.task(bind=True, queue="textgen")
+@celery.task(bind=True, queue="textgen", ignore_result=True)
 def cleanup_generated_task(self):
     cleanup(os.environ["GENERATED"], config["cleanup"]["generated_min_lifetime"])
