@@ -1,4 +1,5 @@
 import logging
+import math
 import random
 
 from dataclasses import dataclass, asdict
@@ -22,6 +23,10 @@ class TextgenError(Exception):
     
 
 class DepthError(TextgenError):
+    pass
+
+
+class TemperatureError(TextgenError):
     pass
 
 
@@ -71,7 +76,8 @@ class TextGenerator:
             yield i, len(text)
 
         # Wrap around at the end of the text
-        freq_dict.update(current=text[-1], prefix=text[-depth-1:-1], next=text[0])
+        for i in range(depth):
+            freq_dict.update(current=text[i], prefix=text[-(depth - i):] + text[:i], next=text[i + 1])
         
         return freq_dict
     
@@ -136,7 +142,7 @@ class TextGenerator:
         freq_dict.normalize()
         return freq_dict
 
-    def make_generator(self, seed, freq_dict, depth):
+    def make_generator(self, seed, freq_dict, depth, temperature):
         """
         Create a text generator from a frequency dictionary.
         """
@@ -162,7 +168,8 @@ class TextGenerator:
                 if not candidates:
                     raise StuckError(current=current, previous=previous)
 
-                next = random.choices(list(candidates.keys()), weights=list(candidates.values()), k=1)[0]
+                weights = [math.pow(weight, temperature) for weight in candidates.values()]
+                next = random.choices(list(candidates.keys()), weights=weights, k=1)[0]
                 buffer.write(next)
                 yield next
 

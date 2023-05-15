@@ -5,12 +5,13 @@ class CheckStatusSchema(Schema):
     task_id = fields.String(required=True)
 
 
-class TextgenSchema(Schema):
+class TextgenRequestSchema(Schema):
     input_id = fields.String(required=True)
     train_depths = fields.List(fields.Integer(), required=True)
     gen_depth = fields.Integer(required=True)
     seed = fields.String(required=True)
     length = fields.Integer(load_default=10000)
+    temperature = fields.Float(load_default=1)
 
 
 class TextgenCacheConfigSchema(Schema):
@@ -32,6 +33,7 @@ class TextgenTextGenerationConfigSchema(Schema):
     max_gen_retries = fields.Integer(required=True, data_key="MaxGenRetries")
     max_length = fields.Integer(required=True, data_key="MaxLength")
     max_depth = fields.Integer(required=True, data_key="MaxDepth")
+    temp_range = fields.List(fields.Float(), required=True, data_key="TemperatureRange", validate=lambda l: len(l) == 2 and l[0] <= l[1])
 
 
 class TextgenCleanupConfigSchema(Schema):

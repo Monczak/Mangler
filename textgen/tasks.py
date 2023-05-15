@@ -43,6 +43,7 @@ class Errors(Enum):
     INVALID_DEPTH = {"code": 13, "reason": "invalid depth"}
     INVALID_LENGTH = {"code": 14, "reason": "invalid length"}
     BAD_DEPTH = {"code": 15, "reason": "bad depth"}
+    BAD_TEMP = {"code": 16, "reason": "bad temperature"}
 
     TIMEOUT = {"code": 98, "reason": "timeout"}
 
@@ -117,7 +118,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
 
 @celery.task(bind=True, soft_time_limit=config["tasks"]["soft_time_limit"], time_limit=config["tasks"]["time_limit"], queue="textgen")
-def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
+def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, temperature):
     """
     Generate text based on the contents of the files specified by input_id.
     Use cached data for text generation if available and usable.
@@ -137,6 +138,10 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
         
         if gen_depth not in train_depths:
             return handle_failure(Errors.BAD_DEPTH, details=f"Depth {gen_depth} is invalid, must be one of {set(train_depths)}")
+
+        min_temp, max_temp = config["textgen"]["temp_range"]
+        if not min_temp <= temperature <= max_temp:
+            return handle_failure(Errors.BAD_TEMP, details=f"Temperature {temperature} is invalid, must be in range {min_temp} - {max_temp}")
 
         # Actually analyze and generate text
         with cache_manager.acquire_open(input_id, "r+b") as cache:
@@ -178,7 +183,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length):
 
         logger.info(f"Generating {length} characters for {input_id}, outfile is {out_file_name}")
         while True:
-            generator = textgen.make_generator(seed, freq_dict, gen_depth)
+            generator = textgen.make_generator(seed, freq_dict, gen_depth, temperature)
             current_attempt += 1
             if current_attempt >= max_gen_retries:
                 return TextgenTaskResult.failure(Errors.MAX_RETRIES_EXCEEDED)

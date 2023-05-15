@@ -27,6 +27,9 @@ MaxLength = 100000
 # Max freqdict depth
 MaxDepth = 10
 
+# Range of valid temperatures
+TemperatureRange = [-10, 10]
+
 
 [Tasks]
 
