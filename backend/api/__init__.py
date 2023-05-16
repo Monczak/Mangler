@@ -52,6 +52,7 @@ def check_status(task_id):
 
     json = response.json()
     result = json["result"] if json["state"] not in ("ANALYZING", "GENERATING") else json["state_info"]
+    result["state"] = json["state"]
 
     return jsonify(result), response.status_code
 

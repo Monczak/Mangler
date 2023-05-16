@@ -179,7 +179,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, te
         max_gen_retries = config["textgen"]["max_gen_retries"]
         current_attempt = -1
 
-        out_file_name = str(uuid.uuid4())
+        out_file_name = str(self.request.id)
 
         logger.info(f"Generating {length} characters for {input_id}, outfile is {out_file_name}")
         while True:
@@ -203,7 +203,7 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, te
             
             break
 
-        return TextgenTaskResult.success(output_id=out_file_name)
+        return TextgenTaskResult.success()
     except FileLockedError as err:
         logger.warning(f"Cache for {err.file_name} is in use by another task, retrying in {config['cache']['retry_delay']} seconds")
         raise self.retry(exc=err, countdown=config['cache']['retry_delay'], max_retries=config['cache']['cache_locked_retries'])
