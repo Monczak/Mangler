@@ -34,11 +34,71 @@ a {
 .panel {
     background: rgb(45, 30, 68);
     border-radius: 25px;
+    padding: 15px;
 }
 
 .panel-darker {
     background: rgb(33, 22, 49);
     border-radius: 25px;
+    padding: 15px;
+}
+
+.text-area {
+    overflow-y: auto;
+    word-wrap: break-word;
+    cursor: text;
+}
+
+.text-area > span[contenteditable] {
+    outline: 0px solid transparent;
+    border-radius: 5px;
+}
+
+.text-area > span[contenteditable]:empty::before {
+    content: attr(placeholder);
+    color: #876b8f;
+    background: rgb(53, 39, 73);
+    padding: 0 3px;
+    border-radius: 5px;
+}
+
+.text-area > span[contenteditable]:empty:hover::before {
+    color: #aca5af;
+    background: rgb(93, 69, 126);
+    border-radius: 5px;
+}
+
+.text-area > span[contenteditable]:empty:focus::before {
+    color: #d9cfdd;
+    background: rgb(109, 83, 146);
+    border-radius: 5px;
+}
+
+.text-area > span[contenteditable]:hover {
+    background: rgb(93, 69, 126);
+    border-radius: 5px;
+}
+
+.text-area > span[contenteditable]:focus {
+    background: rgb(109, 83, 146);
+    border-radius: 5px;
+}
+
+.empty-span {
+    display: inline-block;
+    min-width: 1ch;
+}
+
+.seed-text {
+    color: #9a58a9;
+}
+
+.seed-text:focus, .seed-text:hover {
+    color: #cfadd7;
+}
+
+.generated-text {
+    color:#d9d1dc;
 }
 
 .form-control {
