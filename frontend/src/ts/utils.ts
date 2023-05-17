@@ -34,4 +34,17 @@ export class Utils {
         selection?.removeAllRanges();
         selection?.addRange(range);
     }
+
+    static setCaretPosition(elem: HTMLElement, toEnd: boolean = false) {
+        let selection = window.getSelection();
+        let range = document.createRange();
+        
+        let node = elem.lastChild;
+        if (node)
+            range.setStart(node, node.textContent ? node.textContent.length - 1 : 0);
+        range.collapse(true);
+
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+    }
 }
