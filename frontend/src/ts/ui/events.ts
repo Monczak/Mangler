@@ -29,7 +29,7 @@ function onTextAreaKeyDown(event: KeyboardEvent) {
     if (event.key === "Enter") {
         if (span.innerHTML === "") {
             event.preventDefault();
-            span.appendChild(document.createElement("br"));   
+            span.appendChild(document.createElement("br"));
             span.appendChild(document.createElement("br"));
 
             Utils.setCaretPosition(span, -1);
@@ -67,6 +67,25 @@ export function setupEventListeners() {
         seedInputObserver.observe(seedInput, config);
         seedInput.addEventListener("dblclick", event => onSeedTextDoubleClicked(<HTMLElement>event.target));
         seedInput.addEventListener("focusout", event => onSeedTextFocusedOut(<HTMLElement>event.target))
+
+        seedInput.addEventListener('copy', function (event) {
+            event.preventDefault();
+
+            const span: HTMLSpanElement = event.target as HTMLSpanElement;
+            const text = span.innerText;
+            (<ClipboardEvent>event).clipboardData?.setData('text/plain', text);
+        });
+
+        seedInput.addEventListener('paste', function (event) {
+            event.preventDefault();
+            const text = (<ClipboardEvent>event).clipboardData?.getData('text/plain') ?? "";
+            document.getSelection()?.deleteFromDocument();
+            const range = document.getSelection()?.getRangeAt(0);
+            if (range) {
+                range.insertNode(document.createTextNode(text));
+                range.collapse(false);
+            }
+        });
     }
 
     const textArea = document.querySelector("#text-area");
