@@ -32,7 +32,7 @@ function onTextAreaKeyDown(event: KeyboardEvent) {
             span.appendChild(document.createElement("br"));   
             span.appendChild(document.createElement("br"));
 
-            Utils.setCaretPosition(span, true);
+            Utils.setCaretPosition(span, -1);
         }
     }
     else if (event.key === "Backspace" || event.key === "Delete") {
