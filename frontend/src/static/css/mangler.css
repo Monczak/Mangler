@@ -9,6 +9,10 @@ a {
     text-decoration: none;
 }
 
+.display-none {
+    display: none;
+}
+
 .footer {
     margin-bottom: 30px;
     color: #705f74;
@@ -112,4 +116,22 @@ a {
     color: #f9f1fc;
     border: transparent;
     box-shadow: none;
+}
+
+.file-badge {
+    background: rgba(45, 30, 68, 0.3);
+    color: #f9f1fc;
+    border-radius: 10px;
+    border: 2px solid rgb(76, 51, 112);
+    padding: 1px 5px;
+    max-width: fit-content;
+    display: inline-flex;
+    font-size: 0.8rem;
+    font-weight: 600;
+    align-items: center;
+}
+
+.file-badge-close-btn { 
+    margin-right: 5px;
+    box-shadow: none !important;
 }

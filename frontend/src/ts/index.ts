@@ -1,5 +1,5 @@
 import { Utils } from "@utils";
-import { setupEventListeners } from "@events";
+import { setupEventListeners } from "ui/setup";
 
 function test() {
     console.log("test")

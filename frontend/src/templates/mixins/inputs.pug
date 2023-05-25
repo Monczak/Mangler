@@ -2,3 +2,12 @@ mixin textInput(label)
     .hstack.gap-2
         label(for=label)= label
         input(id=label type="text" name=label).form-control.input
+
+mixin fileBadge(name)
+    .file-badge
+        button.btn-close.btn-close-white.file-badge-close-btn
+        span= name
+
+mixin fileInput()
+    .hstack.gap-2 
+
