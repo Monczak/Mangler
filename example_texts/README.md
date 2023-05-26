@@ -6,13 +6,13 @@ To do so, simply copy any .txt files you fancy into this directory. You will als
 
 ```yml
 examples:
-    file name without extension here:
-        title: <text/work title here>
-        author: <author name here, not required>
-        lang: <text language here>
-        tags:
-            - some tag
-            - another tag
+  file name without extension here:
+    title: <text/work title here>
+    author: <author name here, not required>
+    lang: <text language here>
+    tags:
+      - some tag
+      - another tag
 ```
 
 For every file you include in this directory, a description should be present in `metadata.yml`, otherwise The Mangler will not load the file. In the following example, the directory contains `doll.txt` and `macbeth.txt`:
