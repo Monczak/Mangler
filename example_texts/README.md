@@ -20,7 +20,7 @@ For every file you include in this directory, a description should be present in
 ```yml
 examples:
   doll:
-    name: Lalka
+    title: Lalka
     author: Bolesław Prus
     lang: Polish
     tags:
@@ -28,7 +28,7 @@ examples:
       - book
 
   macbeth:
-    name: The Tragedy of Macbeth
+    title: The Tragedy of Macbeth
     author: William Shakespeare
     lang: English
     tags:
