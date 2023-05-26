@@ -3,11 +3,21 @@ include mixins/inputs
 .panel
     .row
         .col-12.col-md-4
-            .file-badge-container#file-badge-container
-                +fileBadge("Test 1")
-                +fileBadge("Test 2")
-                +fileBadge("Test 3")
+            .hstack.p-2.d-flex
+                button.btn#open-file-panel-btn
+                    i.bi.bi-ib.bi-chevron-right
+                
+                .file-badge-container#file-badge-container
+                    +fileBadge("Test 1")
+                    +fileBadge("Test 2")
+                    +fileBadge("Test 3")
         .col-12.col-md-6
             +textInput("test")
         .col-12.col-md-2
             p Submit
+
+    .row#file-panel
+        .col-lg-2.col-md-12
+            span Examples 
+        .col-lg-10.col-md-12
+            span File Drop Zone

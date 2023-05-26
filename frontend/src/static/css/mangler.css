@@ -118,6 +118,10 @@ a {
     box-shadow: none;
 }
 
+.btn {
+    color: #f9f1fc;
+}
+
 .file-badge {
     background: rgba(45, 30, 68, 0.3);
     color: #f9f1fc;
@@ -134,4 +138,34 @@ a {
 .file-badge-close-btn { 
     margin-right: 5px;
     box-shadow: none !important;
+}
+
+.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.expanded {
+    max-height: 24px;
+    overflow: auto;
+    transition: max-height 0.3s ease;
+}
+
+.btn > i {
+    pointer-events: none;
+}
+
+.bi-ib {
+    display: inline-block;
+}
+
+.rotate-none {
+    rotate: 0deg;
+    transition: rotate 0.3s;
+}
+
+.rotate-90-right {
+    rotate: 90deg;
+    transition: rotate 0.3s;
 }
