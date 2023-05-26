@@ -29,6 +29,7 @@ services:
       - uploads:${MANGLER_UPLOADS}
       - generated:${MANGLER_GENERATED}
       - frontend:${MANGLER_ROOT}/frontend
+      - ./example_texts:${MANGLER_ROOT}/examples:ro
     environment:
       - VERSION=${MANGLER_VERSION}
       - REDIS_URL=${REDIS_URL}
@@ -36,6 +37,7 @@ services:
       - UPLOADS=${MANGLER_UPLOADS}
       - GENERATED=${MANGLER_GENERATED}
       - FRONTEND=${MANGLER_ROOT}/frontend
+      - EXAMPLES=${MANGLER_ROOT}/examples
 
       # Remove this for production!
       - DEBUG=1
@@ -200,6 +202,7 @@ volumes:
   cache:
   redis_data:
   frontend:
+
 
 networks:
   mangler-net:

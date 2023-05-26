@@ -7,6 +7,7 @@ from pathlib import Path
 
 from common.configloader import current_config as config
 from common.logger import get_logger
+from exampleloader import ExampleError, ExampleLoader
 from flask import Blueprint, request, jsonify, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -23,6 +24,18 @@ limiter = Limiter(get_remote_address, app=app, storage_uri=os.environ["REDIS_URL
 UPLOADS_DIR = Path(os.environ["UPLOADS"])
 GENERATED_DIR = Path(os.environ["GENERATED"])
 TEXTGEN_URL = os.environ["TEXTGEN_URL"]
+
+EXAMPLES_DIR = Path(os.environ["EXAMPLES"])
+
+example_loader = ExampleLoader(EXAMPLES_DIR)
+examples = {}
+try:
+    examples = example_loader.load_examples()["examples"]
+    logger.info(f"{len(examples)} examples loaded successfully")
+except FileNotFoundError as err:
+    logger.warn("Examples not found, won't provide any")
+except ExampleError as err:
+    logger.warn(f"There was an error when loading examples: {str(err)}")
 
 
 @api.route("/upload", methods=["POST"])
@@ -66,3 +79,8 @@ def get_text(text_id):
     with open(path, "r") as file:
         text = file.read()
     return text, 200
+
+
+@api.route("/examples", methods=["GET"])
+def get_examples():
+    return jsonify(examples), 200 if examples else 204
