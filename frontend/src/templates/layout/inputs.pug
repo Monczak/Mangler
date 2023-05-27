@@ -18,6 +18,11 @@ include mixins/inputs
 
     .row#file-panel
         .col-lg-2.col-md-12
-            span Examples 
+            .dropdown
+                button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
+                    Examples
+                .dropdown-menu(aria-labelledby="dropdown-examples")
+                    each name in examplenames
+                        a.dropdown-item(href="#")= name
         .col-lg-10.col-md-12
             span File Drop Zone

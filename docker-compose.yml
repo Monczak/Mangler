@@ -29,6 +29,7 @@ services:
       - uploads:${MANGLER_UPLOADS}
       - generated:${MANGLER_GENERATED}
       - frontend:${MANGLER_ROOT}/frontend
+      
       - ./example_texts:${MANGLER_ROOT}/examples:ro
     environment:
       - VERSION=${MANGLER_VERSION}

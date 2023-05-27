@@ -7,7 +7,7 @@ from pathlib import Path
 
 from common.configloader import current_config as config
 from common.logger import get_logger
-from exampleloader import ExampleError, ExampleLoader
+from exampleloader import current_examples as examples
 from flask import Blueprint, request, jsonify, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -25,18 +25,6 @@ UPLOADS_DIR = Path(os.environ["UPLOADS"])
 GENERATED_DIR = Path(os.environ["GENERATED"])
 TEXTGEN_URL = os.environ["TEXTGEN_URL"]
 
-EXAMPLES_DIR = Path(os.environ["EXAMPLES"])
-
-example_loader = ExampleLoader(EXAMPLES_DIR)
-examples = {}
-try:
-    examples = example_loader.load_examples()["examples"]
-    logger.info(f"{len(examples)} examples loaded successfully")
-except FileNotFoundError as err:
-    logger.warn("Examples not found, won't provide any")
-except ExampleError as err:
-    logger.warn(f"There was an error when loading examples: {str(err)}")
-
 
 @api.route("/upload", methods=["POST"])
 @limiter.limit(config["rate_limits"]["upload"])
@@ -50,7 +38,7 @@ def upload():
         filename = f"{file_id}.{i}"
         file.save(UPLOADS_DIR / filename)
 
-    return jsonify({"id": file_id}), 201
+    return jsonify({"id": file_id, "ttl": config["cleanup"]["uploads_min_lifetime"]}), 201
 
 
 @api.route("/generate", methods=["POST"])

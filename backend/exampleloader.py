@@ -10,6 +10,8 @@ from schema import ExampleMetadataSchema
 
 METADATA_FILE_NAME = "metadata.yml"
 
+current_examples = None
+
 
 class ExampleError(Exception):
     pass
@@ -37,6 +39,7 @@ class ExampleLoader:
 
 
     def load_examples(self):
+        global current_examples
         if self.path.is_dir():
             metadata_path = self.path / METADATA_FILE_NAME
             if metadata_path.is_file():
@@ -46,6 +49,8 @@ class ExampleLoader:
                     for file_name in example_data["examples"]:
                         if not Path(self.path / file_name).with_suffix(".txt").is_file():
                             raise ExampleError(f"File {file_name}.txt (defined in metadata) not found")
+                        
+                    current_examples = example_data
                     return example_data
             else:
                 raise FileNotFoundError(f"{METADATA_FILE_NAME} not found")

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from flask import Flask, render_template
 
+from exampleloader import ExampleLoader, ExampleError
 from schema import BackendConfigSchema
 from common.configloader import ConfigError, parse_toml
 
@@ -20,6 +21,19 @@ try:
 except ConfigError as err:
     logger.error(str(err))
     exit(1)
+
+
+EXAMPLES_DIR = Path(os.environ["EXAMPLES"])
+
+example_loader = ExampleLoader(EXAMPLES_DIR)
+examples = {}
+try:
+    examples = example_loader.load_examples()["examples"]
+    logger.info(f"{len(examples)} examples loaded successfully")
+except FileNotFoundError as err:
+    logger.warn("Examples not found, won't provide any")
+except ExampleError as err:
+    logger.warn(f"There was an error when loading examples: {str(err)}")
 
 app = Flask(__name__, static_folder=frontend_path / "static", template_folder=frontend_path / "templates")
 app.jinja_env.add_extension("pypugjs.ext.jinja.PyPugJSExtension")
@@ -38,7 +52,7 @@ version = os.environ["VERSION"]
 
 @app.route("/")
 def index():
-    return render_template("index.pug", static="static", version=version)
+    return render_template("index.pug", static="static", version=version, examplenames=[example["name"] for example in examples.values()])
 
 
 if __name__ == "__main__":

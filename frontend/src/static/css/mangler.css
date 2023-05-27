@@ -147,8 +147,8 @@ a {
 }
 
 .expanded {
-    max-height: 24px;
-    overflow: auto;
+    max-height: 40px;
+    overflow: visible;
     transition: max-height 0.3s ease;
 }
 

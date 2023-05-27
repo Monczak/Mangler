@@ -1,3 +1,3 @@
-# Mangler Backend
+# The Mangler Backend
 
-This is the Python backend for Mangler. Right now there's nothing here, though. Very sad times.
+This is the Python backend for The Mangler. It serves the frontend and implements a REST API for accepting text generation requests.
