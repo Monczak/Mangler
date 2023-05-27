@@ -142,14 +142,18 @@ a {
 
 .collapsed {
     max-height: 0;
-    overflow: hidden;
+    overflow: hidden !important;
     transition: max-height 0.3s ease;
 }
 
 .expanded {
     max-height: 40px;
-    overflow: visible;
+    overflow: hidden;
     transition: max-height 0.3s ease;
+}
+
+.overflow-visible {
+    overflow: visible;
 }
 
 .btn > i {
@@ -168,4 +172,24 @@ a {
 .rotate-90-right {
     rotate: 90deg;
     transition: rotate 0.3s;
+}
+
+.dropdown-menu {
+    background: rgba(33, 22, 49, 0.3);
+    backdrop-filter: blur(3px);
+    border: 1px solid #f9f1fc40;
+}
+
+.dropdown-item {
+    color: #f9f1fc;
+}
+
+.dropdown-item:hover {
+    background: rgba(76, 51, 112, 0.3);
+    color: #f9f1fc;
+}
+
+.dropdown-item:active {
+    background: rgba(76, 51, 112, 0.6);
+    color: #f9f1fc;
 }

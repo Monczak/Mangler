@@ -8,8 +8,9 @@ export class FilePanelHandler implements EventHandler {
     panelHide = "collapsed";
 
     panel = document.querySelector("#file-panel");
+    examplesDropdownBtn = document.querySelector("#dropdown-examples");
 
-    onClick(event: MouseEvent): void {
+    onOpenBtnClick(event: MouseEvent): void {
         const icon = <HTMLElement>(<HTMLButtonElement>event.target).firstChild;
 
         if (icon) {
@@ -23,12 +24,24 @@ export class FilePanelHandler implements EventHandler {
             }
         }
     }
+
+    onExamplesDropdownClick(event: MouseEvent): void {
+        const btn = <HTMLButtonElement>event.target;
+        if (btn.getAttribute("aria-expanded") === "true") {
+            this.panel?.classList.add("overflow-visible");
+        }
+        else {
+            this.panel?.classList.remove("overflow-visible");
+        }
+    }
     
     setupEventListeners(): void {
         const openBtn = document.querySelector("#open-file-panel-btn");
-        openBtn?.addEventListener("click", event => this.onClick(<MouseEvent>event));
+        openBtn?.addEventListener("click", event => this.onOpenBtnClick(<MouseEvent>event));
         openBtn?.querySelector("i")?.classList.add(this.rotateOff);
         this.panel?.classList.add(this.panelHide);
+
+        this.examplesDropdownBtn?.addEventListener("click", event => this.onExamplesDropdownClick(<MouseEvent>event));
     }
     
 }
