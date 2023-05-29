@@ -1,26 +1,16 @@
+import { Singleton } from "utils/singleton";
+
 export type FileStorageUpdateCallback = (files: Array<File>) => void;
 
-export class FileStorage {
-    private static instance: FileStorage; 
-    
+export class FileStorage extends Singleton<FileStorage>() {    
     private fileSet!: Set<File>;
 
     private updateCallbacks!: Set<FileStorageUpdateCallback>;
 
     constructor() {
-        if (FileStorage.instance)
-            return FileStorage.instance;
-        
-        FileStorage.instance = this;
-
+        super();
         this.fileSet = new Set<File>();
         this.updateCallbacks = new Set<FileStorageUpdateCallback>();
-    }
-
-    static getInstance() {
-        if (!FileStorage.instance)
-            FileStorage.instance = new FileStorage();
-        return FileStorage.instance;
     }
 
     private notifyUpdate() {

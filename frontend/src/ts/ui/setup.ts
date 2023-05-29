@@ -18,7 +18,6 @@ export function setupEventListeners() {
         handlerInstance.setupEventListeners();
     }
 
-    console.log(FileBadgeHandler.getInstance());
     FileStorage.getInstance().registerCallback(files => FileBadgeHandler.getInstance().setFrom(files));
 }
 
