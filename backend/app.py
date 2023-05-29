@@ -52,7 +52,7 @@ version = os.environ["VERSION"]
 
 @app.route("/")
 def index():
-    return render_template("index.pug", static="static", version=version, examplenames=[example["name"] for example in examples.values()])
+    return render_template("index.pug", static="static", version=version, examplenames=[example["title"] for example in examples.values()])
 
 
 if __name__ == "__main__":

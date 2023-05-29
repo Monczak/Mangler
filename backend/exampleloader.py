@@ -46,7 +46,7 @@ class ExampleLoader:
                 with open(metadata_path, "r") as file:
                     example_data = self.parse_yaml(file.read())
 
-                    for file_name in example_data["examples"]:
+                    for file_name in example_data:
                         if not Path(self.path / file_name).with_suffix(".txt").is_file():
                             raise ExampleError(f"File {file_name}.txt (defined in metadata) not found")
                         
