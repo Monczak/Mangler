@@ -1,6 +1,11 @@
-import { EventHandler } from "@events/eventhandler";
+import { IEventHandler } from "@events/eventhandler";
+import { Singleton } from "utils/singleton";
 
-export class FilePanelHandler implements EventHandler {
+export class FilePanelHandler extends Singleton<FilePanelHandler>() implements IEventHandler {
+    constructor() {
+        super();
+    }
+    
     rotateOn = "rotate-90-right";
     rotateOff = "rotate-none";   
 

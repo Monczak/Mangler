@@ -1,3 +1,3 @@
-export interface EventHandler {
+export interface IEventHandler {
     setupEventListeners(): void;
 }

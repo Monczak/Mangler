@@ -1,7 +1,12 @@
 import { Utils } from "@utils";
-import { EventHandler } from "@events/eventhandler";
+import { IEventHandler } from "@events/eventhandler";
+import { Singleton } from "utils/singleton";
 
-export class SeedInputHandler implements EventHandler {
+export class SeedInputHandler extends Singleton<SeedInputHandler>() implements IEventHandler {
+    constructor() {
+        super();
+    }
+    
     onChanged(elem: HTMLElement) {
         if (elem.textContent?.trim() === "")
             elem.classList.add("empty-span");

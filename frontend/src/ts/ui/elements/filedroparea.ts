@@ -1,6 +1,12 @@
-import { EventHandler } from "@events/eventhandler";
+import { IEventHandler } from "@events/eventhandler";
+import { FileStorage } from "filestorage";
+import { Singleton } from "utils/singleton";
 
-export class FileDropAreaHandler implements EventHandler {
+export class FileDropAreaHandler extends Singleton<FileDropAreaHandler>() implements IEventHandler {
+    constructor() {
+        super();
+    }
+
     preventDefault(event: Event): void {
         event.preventDefault();
         event.stopPropagation();
@@ -16,7 +22,11 @@ export class FileDropAreaHandler implements EventHandler {
     }
 
     handleDrop(event: DragEvent) {
-        console.log(event.dataTransfer?.files);
+        if (event.dataTransfer) {
+            for (let file of event.dataTransfer.files) {
+                FileStorage.getInstance().addFile(file);
+            }
+        }
     }
     
     setupEventListeners(): void {

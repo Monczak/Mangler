@@ -1,7 +1,12 @@
 import { Utils } from "@utils";
-import { EventHandler } from "@events/eventhandler";
+import { IEventHandler } from "@events/eventhandler";
+import { Singleton } from "utils/singleton";
 
-export class TextAreaHandler implements EventHandler {
+export class TextAreaHandler extends Singleton<TextAreaHandler>() implements IEventHandler {
+    constructor() {
+        super();
+    }
+    
     onTextAreaClicked(elem: HTMLElement) {
         const seedInput = document.querySelector("#seed-input") as HTMLElement;
         if (seedInput) {
