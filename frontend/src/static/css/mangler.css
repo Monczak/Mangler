@@ -140,16 +140,17 @@ a {
     box-shadow: none !important;
 }
 
+.file-panel {
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+}
+
 .collapsed {
     max-height: 0;
-    overflow: hidden !important;
-    transition: max-height 0.3s ease;
 }
 
 .expanded {
-    max-height: 40px;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
+    max-height: 70px;
 }
 
 .overflow-visible {

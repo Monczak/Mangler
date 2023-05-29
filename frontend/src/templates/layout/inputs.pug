@@ -16,8 +16,8 @@ include mixins/inputs
         .col-12.col-md-2
             p Submit
 
-    .row#file-panel
-        .col-lg-2.col-md-12
+    .row.file-panel#file-panel
+        .col-auto.p-2
             .dropdown
                 if examplenames|length > 0
                     button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
@@ -29,5 +29,5 @@ include mixins/inputs
                 .dropdown-menu(aria-labelledby="dropdown-examples")
                     each name in examplenames
                         a.dropdown-item(href="#")= name
-        .col-lg-10.col-md-12
+        .col-auto.p-2
             span File Drop Zone
