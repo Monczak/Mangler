@@ -28,7 +28,7 @@ EXAMPLES_DIR = Path(os.environ["EXAMPLES"])
 example_loader = ExampleLoader(EXAMPLES_DIR)
 examples = {}
 try:
-    examples = example_loader.load_examples()["examples"]
+    examples = example_loader.load_examples()
     logger.info(f"{len(examples)} examples loaded successfully")
 except FileNotFoundError as err:
     logger.warning("Examples not found, won't provide any")

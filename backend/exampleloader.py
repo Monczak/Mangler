@@ -35,7 +35,7 @@ class ExampleLoader:
             raise ExampleError(f"Could not parse config file:\n"
                           + "\n".join([f"{field}: {msgs}" for field, msgs in err.messages_dict.items()]))
         
-        return parsed_data
+        return parsed_data["examples"]
 
 
     def load_examples(self):

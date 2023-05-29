@@ -17,7 +17,7 @@ include mixins/inputs
             p Submit
 
     .row.file-panel#file-panel
-        .col-auto.p-2
+        .col-auto.p-2.d-flex.align-items-center
             .dropdown
                 if examplenames|length > 0
                     button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
@@ -29,5 +29,10 @@ include mixins/inputs
                 .dropdown-menu(aria-labelledby="dropdown-examples")
                     each name in examplenames
                         a.dropdown-item(href="#")= name
-        .col-auto.p-2
-            span File Drop Zone
+        .col-auto.p-2.flex-fill.align-items-center
+            form
+                fieldset.file-drop-area.hstack.text-center.d-flex.justify-content-between
+                    input.p-2.position-absolute.invisible#upload-file-input(type="file", multiple, accept="text/plain")
+                    
+                    span.p-2.unselectable.file-drop-area-text Drag and drop files here
+                    label.p-2.btn.btn-upload(for="upload-file-input") Choose files
