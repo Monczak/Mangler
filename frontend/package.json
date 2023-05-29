@@ -6,6 +6,9 @@
     "build": "source build.sh"
   },
   "devDependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@types/bootstrap": "^5.2.6",
+    "bootstrap": "^5.2.3",
     "ts-loader": "^9.4.2",
     "tsconfig-paths-webpack-plugin": "^4.0.1",
     "typescript": "^5.0.4",

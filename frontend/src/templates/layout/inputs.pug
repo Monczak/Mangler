@@ -19,8 +19,13 @@ include mixins/inputs
     .row#file-panel
         .col-lg-2.col-md-12
             .dropdown
-                button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
-                    Examples
+                if examplenames|length > 0
+                    button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
+                        Examples
+                else
+                    span.d-inline-block(tabindex="0", data-bs-toggle="tooltip", data-bs-placement="top", title="No examples available")
+                        button.btn.dropdown-toggle.disabled#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
+                            Examples
                 .dropdown-menu(aria-labelledby="dropdown-examples")
                     each name in examplenames
                         a.dropdown-item(href="#")= name

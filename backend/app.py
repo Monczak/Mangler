@@ -31,9 +31,9 @@ try:
     examples = example_loader.load_examples()["examples"]
     logger.info(f"{len(examples)} examples loaded successfully")
 except FileNotFoundError as err:
-    logger.warn("Examples not found, won't provide any")
+    logger.warning("Examples not found, won't provide any")
 except ExampleError as err:
-    logger.warn(f"There was an error when loading examples: {str(err)}")
+    logger.warning(f"There was an error when loading examples: {str(err)}")
 
 app = Flask(__name__, static_folder=frontend_path / "static", template_folder=frontend_path / "templates")
 app.jinja_env.add_extension("pypugjs.ext.jinja.PyPugJSExtension")

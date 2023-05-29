@@ -193,3 +193,7 @@ a {
     background: rgba(76, 51, 112, 0.6);
     color: #f9f1fc;
 }
+
+.grayed {
+    color: #89818c;
+}
