@@ -5,7 +5,7 @@ import os
 
 import states
 
-from flask import Flask, jsonify, request
+from flask import Flask, abort, jsonify, request
 from marshmallow import ValidationError
 
 from schema import TextgenRequestSchema, CheckStatusSchema
@@ -44,6 +44,9 @@ def check_status():
     
     task_result = get_result(data["task_id"])
     state = task_result.state
+    if state == states.PENDING: # If the task doesn't exist
+        abort(404)
+    
     state_info = task_result.info if state in (states.ANALYZING, states.GENERATING) else None
 
     # Catch any exception the task potentially raised, because get() reraises exceptions

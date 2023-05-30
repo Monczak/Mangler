@@ -34,10 +34,10 @@ TemperatureRange = [-10, 10]
 [Tasks]
 
 # Time limit for text generation tasks in seconds
-TimeLimit = 30
+TimeLimit = 60
 
 # Hard time limit for text generation tasks in seconds. If this gets exceeded, the task is terminated immediately.
-HardTimeLimit = 40
+HardTimeLimit = 80
 
 
 [Cleanup]

@@ -1,4 +1,5 @@
 import os
+import shutil
 import uuid
 
 import requests
@@ -24,13 +25,14 @@ limiter = Limiter(get_remote_address, app=app, storage_uri=os.environ["REDIS_URL
 UPLOADS_DIR = Path(os.environ["UPLOADS"])
 GENERATED_DIR = Path(os.environ["GENERATED"])
 TEXTGEN_URL = os.environ["TEXTGEN_URL"]
+EXAMPLES_DIR = os.environ["EXAMPLES"]
 
 
 @api.route("/upload", methods=["POST"])
 @limiter.limit(config["rate_limits"]["upload"])
 def upload():
-    if not request.files:
-        return jsonify({"error": "no files provided"}), 400
+    # if not request.files:
+    #     return jsonify({"error": "no files provided"}), 400
 
     file_id = uuid.uuid4()
 
@@ -43,13 +45,26 @@ def upload():
 
 @api.route("/generate", methods=["POST"])
 def generate_text():
-    response = requests.post(f"http://{TEXTGEN_URL}/generate-text", json=request.json)
+    # Not using Marshmallow for validation here as we only need to handle examples if they're present
+    # Also, validating other parts of the request is the textgen's job and it'll handle unknown keys too
+    if "examples" in request.json.keys():
+        if not isinstance(request.json["examples"], list) or any(not isinstance(example, str) for example in request.json["examples"]):
+            return jsonify({"examples": ["Invalid data."]}), 400
+
+        if "input_id" in request.json.keys():
+            for i, example in enumerate(request.json["examples"]):
+                if (EXAMPLES_DIR / f"{example}.txt").is_file():
+                    shutil.copy(EXAMPLES_DIR / f"{example}.txt", UPLOADS_DIR / f"{request.json['input_id']}.example{i}")
+
+    response = requests.post(f"http://{TEXTGEN_URL}/generate-text", json={key: value for key, value in request.json.items() if key != "examples"})
     return response.text, response.status_code
 
 
 @api.route("/status/<task_id>", methods=["GET"])
 def check_status(task_id):
     response = requests.get(f"http://{TEXTGEN_URL}/check-status", json={"task_id": task_id})
+    if response.status_code == 404:
+        abort(404)
 
     json = response.json()
     result = json["result"] if json["state"] not in ("ANALYZING", "GENERATING") else json["state_info"]

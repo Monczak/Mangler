@@ -19,7 +19,7 @@ include mixins/inputs
     .row.file-panel#file-panel
         .col-auto.p-2.d-flex.align-items-center
             .dropdown
-                if examplenames|length > 0
+                if examples|length > 0
                     button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
                         Examples
                 else
@@ -27,8 +27,14 @@ include mixins/inputs
                         button.btn.dropdown-toggle.disabled#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
                             Examples
                 .dropdown-menu(aria-labelledby="dropdown-examples")
-                    each name in examplenames
-                        a.dropdown-item(href="#")= name
+                    each example in examples
+                        .dropdown-item(href="#").p-2
+                            span= example["title"]
+                            br
+                            span.small= example["author"] + ", " + example["lang"]
+                            br
+                            each tag in example["tags"]
+                                span.small-badge= tag 
         
         .col-auto.p-2.flex-fill.align-items-center
             form

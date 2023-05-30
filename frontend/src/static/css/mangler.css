@@ -185,6 +185,7 @@ a {
 
 .dropdown-item {
     color: #f9f1fc;
+    cursor: pointer;
 }
 
 .dropdown-item:hover {
@@ -223,4 +224,13 @@ a {
 
 .btn-upload:hover, .btn-upload:active, .btn-upload:target, .btn-upload:focus:active {
     background-color: rgba(53, 39, 73, 0.6);
+}
+
+.small-badge {
+    border-radius: 10px;
+    border: 1px solid #876b8f;
+    padding: 0 5px;
+    font-size: small;
+    text-align: center;
+    margin-right: 5px;
 }
