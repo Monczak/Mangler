@@ -28,7 +28,7 @@ include mixins/inputs
                             Examples
                 .dropdown-menu(aria-labelledby="dropdown-examples")
                     each example in examples
-                        .dropdown-item(href="#").p-2
+                        .dropdown-item(href="#", data-example-id=example["id"]).p-2
                             span= example["title"]
                             br
                             span.small= example["author"] + ", " + example["lang"]

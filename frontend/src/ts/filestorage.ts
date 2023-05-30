@@ -3,7 +3,7 @@ import { Singleton } from "utils/singleton";
 export type FileStorageUpdateCallback = (files: Array<File>) => void;
 
 export class FileStorage extends Singleton<FileStorage>() {    
-    private fileMap!: Map<string, File>;
+    private fileMap!: Map<string, File>;    // TODO: Support examples somehow
 
     private updateCallbacks!: Set<FileStorageUpdateCallback>;
 
