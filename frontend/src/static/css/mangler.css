@@ -133,6 +133,8 @@ a {
     font-size: 0.8rem;
     font-weight: 600;
     align-items: center;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .file-badge-close-btn { 
@@ -204,13 +206,18 @@ a {
     border-radius: 5px;
 }
 
-.file-drop-area-text {
+.text-secondary {
     color: rgb(109, 83, 146);
 }
 
+.tooltip {
+    --bs-tooltip-bg: rgba(20, 14, 30, 0.7);
+    backdrop-filter: blur(3px);
+}
+
 .btn-upload {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     background-color: rgba(53, 39, 73, 0.3);
 }
 

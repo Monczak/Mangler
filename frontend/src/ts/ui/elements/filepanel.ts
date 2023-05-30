@@ -1,4 +1,5 @@
 import { IEventHandler } from "@events/eventhandler";
+import { FileStorage } from "filestorage";
 import { Singleton } from "utils/singleton";
 
 export class FilePanelHandler extends Singleton<FilePanelHandler>() implements IEventHandler {
@@ -39,6 +40,16 @@ export class FilePanelHandler extends Singleton<FilePanelHandler>() implements I
             this.panel?.classList.remove("overflow-visible");
         }
     }
+
+    onFileInputChange(event: Event): void {
+        const target = event.target as HTMLInputElement;
+        if (target && target.files) {
+            for (let file of target.files) {
+                FileStorage.getInstance().addFile(file);
+            }
+            target.value = "";  // Remove all files from the input
+        }
+    }
     
     setupEventListeners(): void {
         const openBtn = document.querySelector("#open-file-panel-btn");
@@ -47,6 +58,9 @@ export class FilePanelHandler extends Singleton<FilePanelHandler>() implements I
         this.panel?.classList.add(this.panelHide);
 
         this.examplesDropdownBtn?.addEventListener("click", event => this.onExamplesDropdownClick(<MouseEvent>event));
+
+        const fileInput = document.querySelector("#upload-file-input");
+        fileInput?.addEventListener("change", event => this.onFileInputChange(event))
     }
     
 }

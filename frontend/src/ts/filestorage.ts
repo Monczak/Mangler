@@ -25,23 +25,30 @@ export class FileStorage extends Singleton<FileStorage>() {
         this.updateCallbacks.delete(callback);
     }
 
+    getFileId(file: File): string {
+        // We need to ID the files somehow, making them unique by name & last modified date is not the best way to do this
+        // Sadly browsers don't keep the original paths of uploaded files
+        return file.name + file.lastModified;
+    }
+
     addFile(file: File): boolean {
-        if (this.fileMap.has(file.name))
+        const id = this.getFileId(file);
+        if (this.fileMap.has(id))
             return false;
         
-        this.fileMap.set(file.name, file);
+        this.fileMap.set(id, file);
         this.notifyUpdate();
         return true;
     }
 
     removeFile(file: File): void {
-        console.log(file);
-        this.fileMap.delete(file.name);
+        const id = this.getFileId(file);
+        this.fileMap.delete(id);
         this.notifyUpdate();
     }
 
-    removeFileByName(fileName: string): void {
-        let file = this.fileMap.get(fileName);
+    removeFileByName(fileId: string): void {
+        let file = this.fileMap.get(fileId);
         if (file)
             this.removeFile(file);
     }

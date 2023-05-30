@@ -4,14 +4,14 @@ import { Singleton } from "utils/singleton";
 import { FileStorage } from "filestorage";
 
 export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements IEventHandler {
-    badgeFileNames: Map<HTMLElement, string>;
+    badgeFileIds: Map<HTMLElement, string>;
     
     parent = document.querySelector("#file-badge-container") as HTMLElement;
 
     constructor() {
         super();
 
-        this.badgeFileNames = new Map<HTMLElement, string>();
+        this.badgeFileIds = new Map<HTMLElement, string>();
     }
     
     onClick(event: MouseEvent) {
@@ -20,22 +20,22 @@ export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements I
             this.removeBadge(badge);
     }
 
-    createNew(fileName: string): void {
+    createNew(file: File): void {
         let elem = ElementCreator.createElement<HTMLDivElement>(this.parent, "#file-badge-template", elem => {
             const span = elem.querySelector("span");
             if (span)
-                span.textContent = fileName;
+                span.textContent = file.name;
         });
         elem.addEventListener("click", event => this.onClick(<MouseEvent>event));
 
-        this.badgeFileNames.set(elem, fileName);
+        this.badgeFileIds.set(elem, FileStorage.getInstance().getFileId(file));
     }
 
     removeBadge(badge: HTMLElement): void {
-        let fileName = this.badgeFileNames.get(badge);
+        let fileName = this.badgeFileIds.get(badge);
         if (fileName) {
             FileStorage.getInstance().removeFileByName(fileName);
-            this.badgeFileNames.delete(badge);
+            this.badgeFileIds.delete(badge);
             badge.remove();
         }
     }
@@ -45,8 +45,15 @@ export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements I
             this.parent.removeChild(this.parent.lastChild as ChildNode);
         
         for (let file of files) {
-            this.createNew(file.name)
+            this.createNew(file);
         }
+
+        const noFilesUploadedText = document.querySelector("#no-files-uploaded-text") as HTMLElement;
+        if (files.length > 0)
+            noFilesUploadedText.classList.add("display-none");
+        else
+            noFilesUploadedText.classList.remove("display-none");
+
     }
     
     setupEventListeners(): void {

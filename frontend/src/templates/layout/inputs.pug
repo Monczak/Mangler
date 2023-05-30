@@ -3,14 +3,14 @@ include mixins/inputs
 .panel
     .row
         .col-12.col-md-4
-            .hstack.p-2.d-flex
-                button.btn#open-file-panel-btn
+            .hstack.p-2.d-flex.align-middle
+                button.btn#open-file-panel-btn.p-2
                     i.bi.bi-ib.bi-chevron-right
+
+                span.d-inline-block(tabindex="0", data-bs-toggle="tooltip", data-bs-placement="top", data-bs-custom-class="tooltip", title="Click the arrow on the left to upload files!")
+                    span.text-secondary.unselectable.p-2#no-files-uploaded-text No files uploaded
                 
-                .file-badge-container#file-badge-container
-                    +fileBadge("Test 1")
-                    +fileBadge("Test 2")
-                    +fileBadge("Test 3")
+                .file-badge-container.p-2#file-badge-container
         .col-12.col-md-6
             +textInput("test")
         .col-12.col-md-2
@@ -23,16 +23,17 @@ include mixins/inputs
                     button.btn.dropdown-toggle#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
                         Examples
                 else
-                    span.d-inline-block(tabindex="0", data-bs-toggle="tooltip", data-bs-placement="top", title="No examples available")
+                    span.d-inline-block(tabindex="0", data-bs-toggle="tooltip", data-bs-placement="top", data-bs-custom-class="tooltip", title="No examples available")
                         button.btn.dropdown-toggle.disabled#dropdown-examples(type="button", data-bs-toggle="dropdown", aria-haspopup="true", aria-expanded="false").
                             Examples
                 .dropdown-menu(aria-labelledby="dropdown-examples")
                     each name in examplenames
                         a.dropdown-item(href="#")= name
+        
         .col-auto.p-2.flex-fill.align-items-center
             form
-                fieldset.file-drop-area.hstack.text-center.d-flex.justify-content-between
+                fieldset.file-drop-area.hstack.text-center.d-flex.justify-content-left
                     input.p-2.position-absolute.invisible#upload-file-input(type="file", multiple, accept="text/plain")
                     
-                    span.p-2.unselectable.file-drop-area-text Drag and drop files here
                     label.p-2.btn.btn-upload(for="upload-file-input") Choose files
+                    span.p-2.unselectable.text-secondary Drag and drop files here
