@@ -1,12 +1,17 @@
-import { Singleton } from "utils/singleton";
-import { ExampleFile, SourceFile, UploadedFile } from "sourcefile";
+import { Singleton } from "@utils/singleton";
+import { ExampleFile, SourceFile, UploadedFile } from "@files/sourcefile";
 
 export type FileStorageUpdateCallback = (files: Array<SourceFile>) => void;
 
 export class FileStorage extends Singleton<FileStorage>() {    
-    private fileMap!: Map<string, SourceFile>;    // TODO: Support examples somehow
+    private fileMap!: Map<string, SourceFile>;
 
     private updateCallbacks!: Set<FileStorageUpdateCallback>;
+
+    private _filesChanged: boolean = true;
+    public get filesChanged(): boolean {
+        return this._filesChanged;
+    }
 
     constructor() {
         super();
@@ -14,9 +19,14 @@ export class FileStorage extends Singleton<FileStorage>() {
         this.updateCallbacks = new Set<FileStorageUpdateCallback>();
     }
 
-    private notifyUpdate() {
+    private notifyUpdate(): void {
         this.updateCallbacks.forEach(callback => callback([...this.files()]));
-    } 
+        this._filesChanged = true;
+    }
+
+    resetFilesChanged(): void {
+        this._filesChanged = false;
+    }
 
     registerCallback(callback: FileStorageUpdateCallback): void {
         this.updateCallbacks.add(callback);
@@ -59,7 +69,7 @@ export class FileStorage extends Singleton<FileStorage>() {
             this.removeFile(file);
     }
 
-    files = () => this.fileMap.values();
+    files = () => [...this.fileMap.values()];
 
 
 }

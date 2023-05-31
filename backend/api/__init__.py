@@ -24,8 +24,8 @@ limiter = Limiter(get_remote_address, app=app, storage_uri=os.environ["REDIS_URL
 
 UPLOADS_DIR = Path(os.environ["UPLOADS"])
 GENERATED_DIR = Path(os.environ["GENERATED"])
+EXAMPLES_DIR = Path(os.environ["EXAMPLES"])
 TEXTGEN_URL = os.environ["TEXTGEN_URL"]
-EXAMPLES_DIR = os.environ["EXAMPLES"]
 
 
 @api.route("/upload", methods=["POST"])

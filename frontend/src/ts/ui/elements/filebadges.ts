@@ -1,8 +1,8 @@
 import { IEventHandler } from "@events/eventhandler";
 import { ElementCreator } from "@elements/elementcreator";
 import { Singleton } from "utils/singleton";
-import { FileStorage } from "filestorage";
-import { SourceFile } from "sourcefile";
+import { FileStorage } from "@files";
+import { SourceFile } from "@files/sourcefile";
 
 export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements IEventHandler {
     badgeFileIds: Map<HTMLElement, string>;

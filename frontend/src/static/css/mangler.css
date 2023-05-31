@@ -234,3 +234,19 @@ a {
     text-align: center;
     margin-right: 5px;
 }
+
+.slider-track-low, .slider-track-high {
+    background: rgba(64, 44, 95, 0.5);
+}
+
+.slider-track-selection {
+    background: rgba(76, 51, 112, 0.7);
+}
+
+.slider-handle {
+    background: rgb(109, 83, 146);
+}
+
+.btn#submit-btn {
+    background: rgb(76, 51, 112, 0.5);
+}

@@ -2,8 +2,8 @@ include mixins/inputs
 
 .panel
     .row
-        .col-12.col-md-4
-            .hstack.p-2.d-flex.align-middle
+        .col-12.col-md-4.d-flex.align-items-center
+            .hstack.p-2
                 button.btn#open-file-panel-btn.p-2
                     i.bi.bi-ib.bi-chevron-right
 
@@ -12,9 +12,24 @@ include mixins/inputs
                 
                 .file-badge-container.p-2#file-badge-container
         .col-12.col-md-6
-            +textInput("test")
-        .col-12.col-md-2
-            p Submit
+            .row
+                .col-12.col-md-5
+                    label.unselectable(for="train-depths") Train Depths
+                .col-12.col-md-7
+                    input#train-depths(type="text", name="train-depths", value="")
+            .row
+                .col-12.col-md-5
+                    label.unselectable(for="gen-depth") Generation Depth
+                .col-12.col-md-7
+                    input#gen-depth(type="text", name="gen-depth", value="")
+
+            .row
+                .col-12.col-md-5
+                    label.unselectable(for="gen-depth") Temperature
+                .col-12.col-md-7
+                    input#temperature(type="text", name="temperature", value="")
+        .col-12.col-md-2.d-flex.align-items-center.justify-content-center
+            button.btn#submit-btn Mangle!
 
     .row.file-panel#file-panel
         .col-auto.p-2.d-flex.align-items-center

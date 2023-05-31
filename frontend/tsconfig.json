@@ -31,9 +31,13 @@
     "baseUrl": "src/ts",                                 /* Specify the base directory to resolve non-relative module names. */
     "paths": {
       "@utils": ["utils"],
+      "@utils/*": ["utils/*"],
       "@events/*": ["ui/events/*"],
       "@elements": ["ui/elements"],
       "@elements/*": ["ui/elements/*"],
+      "@behaviors/*": ["ui/behaviors/*"],
+      "@files": ["files/filestorage"],
+      "@files/*": ["files/*"],
     },                                                   /* Specify a set of entries that re-map imports to additional lookup locations. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

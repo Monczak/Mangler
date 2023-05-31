@@ -16,7 +16,11 @@
     "webpack-cli": "^5.1.1"
   },
   "dependencies": {
+    "@types/bootstrap-slider": "^11.0.2",
+    "@types/jquery": "^3.5.16",
     "bootstrap-icons": "^1.10.5",
+    "bootstrap-slider": "^11.0.2",
+    "jquery": "^3.7.0",
     "reflect-metadata": "^0.1.13"
   }
 }

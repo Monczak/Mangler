@@ -1,5 +1,5 @@
 import { IEventHandler } from "@events/eventhandler";
-import { FileStorage } from "filestorage";
+import { FileStorage } from "@files";
 import { Singleton } from "utils/singleton";
 
 export class FileDropAreaHandler extends Singleton<FileDropAreaHandler>() implements IEventHandler {
