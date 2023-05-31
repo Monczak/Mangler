@@ -45,9 +45,19 @@ export class FilePanelHandler extends Singleton<FilePanelHandler>() implements I
         const target = event.target as HTMLInputElement;
         if (target && target.files) {
             for (let file of target.files) {
-                FileStorage.getInstance().addFile(file);
+                FileStorage.getInstance().addUploadedFile(file);
             }
             target.value = "";  // Remove all files from the input
+        }
+    }
+
+    onExampleItemClick(event: MouseEvent): void {
+        const target = (event.target as HTMLElement).closest(".example-item");
+        if (target) {
+            const id = target.attributes.getNamedItem("data-example-id")?.value;
+            const title = target.attributes.getNamedItem("data-example-title")?.value;
+            if (id && title)
+                FileStorage.getInstance().addExampleFile(id, title);
         }
     }
     
@@ -61,6 +71,9 @@ export class FilePanelHandler extends Singleton<FilePanelHandler>() implements I
 
         const fileInput = document.querySelector("#upload-file-input");
         fileInput?.addEventListener("change", event => this.onFileInputChange(event))
+
+        const exampleItems = document.querySelectorAll(".example-item");
+        exampleItems.forEach(item => item.addEventListener("click", event => this.onExampleItemClick(<MouseEvent>event)));
     }
     
 }

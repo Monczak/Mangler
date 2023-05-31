@@ -2,6 +2,7 @@ import { IEventHandler } from "@events/eventhandler";
 import { ElementCreator } from "@elements/elementcreator";
 import { Singleton } from "utils/singleton";
 import { FileStorage } from "filestorage";
+import { SourceFile } from "sourcefile";
 
 export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements IEventHandler {
     badgeFileIds: Map<HTMLElement, string>;
@@ -20,15 +21,15 @@ export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements I
             this.removeBadge(badge);
     }
 
-    createNew(file: File): void {
+    createNew(file: SourceFile): void {
         let elem = ElementCreator.createElement<HTMLDivElement>(this.parent, "#file-badge-template", elem => {
             const span = elem.querySelector("span");
             if (span)
-                span.textContent = file.name;
+                span.textContent = file.name();
         });
         elem.addEventListener("click", event => this.onClick(<MouseEvent>event));
 
-        this.badgeFileIds.set(elem, FileStorage.getInstance().getFileId(file));
+        this.badgeFileIds.set(elem, file.id());
     }
 
     removeBadge(badge: HTMLElement): void {
@@ -40,7 +41,7 @@ export class FileBadgeHandler extends Singleton<FileBadgeHandler>() implements I
         }
     }
 
-    setFrom(files: Array<File>): void {
+    setFrom(files: Array<SourceFile>): void {
         while (this.parent.firstChild)
             this.parent.removeChild(this.parent.lastChild as ChildNode);
         

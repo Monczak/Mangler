@@ -24,7 +24,7 @@ export class FileDropAreaHandler extends Singleton<FileDropAreaHandler>() implem
     handleDrop(event: DragEvent) {
         if (event.dataTransfer) {
             for (let file of event.dataTransfer.files) {
-                console.log(FileStorage.getInstance().addFile(file));
+                console.log(FileStorage.getInstance().addUploadedFile(file));
             }
         }
     }

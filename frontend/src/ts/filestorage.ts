@@ -1,15 +1,16 @@
 import { Singleton } from "utils/singleton";
+import { ExampleFile, SourceFile, UploadedFile } from "sourcefile";
 
-export type FileStorageUpdateCallback = (files: Array<File>) => void;
+export type FileStorageUpdateCallback = (files: Array<SourceFile>) => void;
 
 export class FileStorage extends Singleton<FileStorage>() {    
-    private fileMap!: Map<string, File>;    // TODO: Support examples somehow
+    private fileMap!: Map<string, SourceFile>;    // TODO: Support examples somehow
 
     private updateCallbacks!: Set<FileStorageUpdateCallback>;
 
     constructor() {
         super();
-        this.fileMap = new Map<string, File>();
+        this.fileMap = new Map<string, SourceFile>();
         this.updateCallbacks = new Set<FileStorageUpdateCallback>();
     }
 
@@ -25,30 +26,35 @@ export class FileStorage extends Singleton<FileStorage>() {
         this.updateCallbacks.delete(callback);
     }
 
-    getFileId(file: File): string {
-        // We need to ID the files somehow, making them unique by name & last modified date is not the best way to do this
-        // Sadly browsers don't keep the original paths of uploaded files
-        return file.name + file.lastModified;
-    }
-
-    addFile(file: File): boolean {
-        const id = this.getFileId(file);
+    addUploadedFile(file: File): boolean {
+        const uploadedFile = new UploadedFile(file);
+        const id = uploadedFile.id();
         if (this.fileMap.has(id))
             return false;
         
-        this.fileMap.set(id, file);
+        this.fileMap.set(id, uploadedFile);
         this.notifyUpdate();
         return true;
     }
 
-    removeFile(file: File): void {
-        const id = this.getFileId(file);
+    addExampleFile(id: string, title: string): boolean {
+        const uploadedFile = new ExampleFile(id, title);
+        if (this.fileMap.has(id))
+            return false;
+        
+        this.fileMap.set(id, uploadedFile);
+        this.notifyUpdate();
+        return true;
+    }
+
+    removeFile(file: SourceFile): void {
+        const id = file.id();
         this.fileMap.delete(id);
         this.notifyUpdate();
     }
 
     removeFileByName(fileId: string): void {
-        let file = this.fileMap.get(fileId);
+        const file = this.fileMap.get(fileId);
         if (file)
             this.removeFile(file);
     }
