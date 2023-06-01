@@ -1,5 +1,6 @@
 import { Singleton } from "@utils/singleton";
 import { SourceFile, UploadedFile } from "@files/sourcefile";
+import { APIResponse, UploadResponse, GenerateResponse, StatusResponse, StatusResponseFactory } from "@requests/responses";
 
 export class RequestManager extends Singleton<RequestManager>() {
     private _inputId: string | undefined;
@@ -10,7 +11,7 @@ export class RequestManager extends Singleton<RequestManager>() {
         this._inputId = value;
     }
 
-    async upload(files: Array<SourceFile>) {
+    async upload(files: Array<SourceFile>): Promise<UploadResponse> {
         const uploadedFiles = files.filter(file => file instanceof UploadedFile) as Array<UploadedFile>;
         
         const formData = new FormData();
@@ -24,9 +25,10 @@ export class RequestManager extends Singleton<RequestManager>() {
         });
         const json = await response.json();
         this.inputId = json.id;
+        return new UploadResponse(response.status, json);
     }
 
-    async generateText(trainDepths: Array<number>, genDepth: number, seed: string, temperature: number, examples?: Array<string>) {        
+    async generateText(trainDepths: Array<number>, genDepth: number, seed: string, temperature: number, examples?: Array<string>): Promise<GenerateResponse> {        
         let payload = {
             input_id: this.inputId,
             train_depths: trainDepths, 
@@ -40,8 +42,22 @@ export class RequestManager extends Singleton<RequestManager>() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
-        })
+        });
         const json = await response.json();
-        console.log(json);
+        return new GenerateResponse(response.status, json);
+    }
+
+    async pollStatus(taskId: string): Promise<APIResponse | null> {
+        const response = await fetch(`api/status/${taskId}`, {
+            method: "GET"
+        });
+        return await StatusResponseFactory.makeResponse(response);
+    }
+
+    async retrieveText(taskId: string): Promise<string> {
+        const response = await fetch(`api/text/${taskId}`, {
+            method: "GET"
+        });
+        return await response.text();
     }
 }

@@ -1,6 +1,8 @@
+import { TextAreaHandler } from "@elements/textarea";
 import { FileStorage } from "@files";
 import { ExampleFile } from "@files/sourcefile"
-import { RequestManager } from "requestmanager";
+import { RequestManager } from "@requests";
+import { ErrorResponse, StatusAnalyzingResponse, StatusGeneratingResponse, StatusSuccessResponse, StatusFailureResponse } from "@requests/responses";
 
 export async function onSubmit() {
     if (FileStorage.getInstance().filesChanged) {
@@ -25,7 +27,33 @@ async function generateText() {
         .filter(file => file instanceof ExampleFile)
         .map(file => file.id());
     
-    await RequestManager.getInstance().generateText(trainDepths, genDepth, seed, temperature, exampleIds);
+    const response = await RequestManager.getInstance().generateText(trainDepths, genDepth, seed, temperature, exampleIds);
+    const taskId = response.taskId;
 
-    // TODO: Poll /api/status periodically, display some sort of progress bar
+    let notFoundAttempts = 10;
+
+    const pollStatus = async (onSuccess?: (taskId: string) => any, onFailure?: (response: StatusFailureResponse) => any) => {
+        const status = await RequestManager.getInstance().pollStatus(taskId);
+        console.log(`${status instanceof StatusSuccessResponse} ${JSON.stringify(status)}`);
+
+        if (status instanceof StatusSuccessResponse) {
+            if (onSuccess) await onSuccess(taskId);
+            return;
+        }
+        if (status instanceof StatusFailureResponse) {
+            if (onFailure) await onFailure(status);
+            return;
+        }
+
+        if (status instanceof StatusAnalyzingResponse || status instanceof StatusGeneratingResponse || status == null) {
+            if (status == null && --notFoundAttempts < 0)
+                throw new Error("Attempted to poll status for a non-existent ID")
+            setTimeout(async () => pollStatus(onSuccess, onFailure), 500);
+        }
+    }
+
+    await pollStatus(async taskId => {
+        console.log("SUCCESS");
+        TextAreaHandler.getInstance().setGeneratedText(await RequestManager.getInstance().retrieveText(taskId));
+    });
 }

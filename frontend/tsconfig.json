@@ -38,6 +38,8 @@
       "@behaviors/*": ["ui/behaviors/*"],
       "@files": ["files/filestorage"],
       "@files/*": ["files/*"],
+      "@requests": ["requests/requestmanager"],
+      "@requests/*": ["requests/*"],
     },                                                   /* Specify a set of entries that re-map imports to additional lookup locations. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

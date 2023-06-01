@@ -35,6 +35,12 @@ export class TextAreaHandler extends Singleton<TextAreaHandler>() implements IEv
                 span.innerHTML = "";
         }
     }
+
+    setGeneratedText(text: string) {
+        const generatedTextSpan = document.querySelector("#generated-text");
+        if (generatedTextSpan)
+            generatedTextSpan.textContent = text;
+    }
     
     setupEventListeners() {
         const textArea = document.querySelector("#text-area");
