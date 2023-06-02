@@ -6,7 +6,7 @@ export type FileStorageUpdateCallback = (files: Array<SourceFile>) => void;
 export class FileStorage extends Singleton<FileStorage>() {    
     private fileMap!: Map<string, SourceFile>;
 
-    private updateCallbacks!: Set<FileStorageUpdateCallback>;
+    private updateCallbacks: Set<FileStorageUpdateCallback>;
 
     private _filesChanged: boolean = true;
     public get filesChanged(): boolean {

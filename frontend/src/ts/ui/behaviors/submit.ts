@@ -1,5 +1,6 @@
 import { ModalController } from "@elements/modalcontroller";
 import { ProgressBarController } from "@elements/progressbar";
+import { SubmitButtonController } from "@elements/submitcontroller";
 import { TextAreaHandler } from "@elements/textarea";
 import { FileStorage } from "@files";
 import { ExampleFile } from "@files/sourcefile"
@@ -71,12 +72,10 @@ async function generateText() {
 
     await pollStatus(async taskId => {
         TextAreaHandler.getInstance().setGeneratedText(await RequestManager.getInstance().retrieveText(taskId));
-        TextAreaHandler.getInstance().setOverlayVisible(false);
-        document.querySelector("#submit-btn")?.classList.remove("disabled");
+        reenableControls();
     }, async response => {
         ModalController.getInstance().showErrorModal({code: response.errorCode, reason: response.reason, details: response.details});
-        TextAreaHandler.getInstance().setOverlayVisible(false);
-        document.querySelector("#submit-btn")?.classList.remove("disabled");
+        reenableControls();
     }, response => {     
         let current, total;
         let text;
@@ -97,7 +96,11 @@ async function generateText() {
         ProgressBarController.getInstance().setProgressBarValue(current, total);
     }, () => {
         ModalController.getInstance().showErrorModal({code: -1, reason: "not found"});
-        TextAreaHandler.getInstance().setOverlayVisible(false);
-        document.querySelector("#submit-btn")?.classList.remove("disabled");
+        reenableControls();
     });
+
+    function reenableControls() {
+        TextAreaHandler.getInstance().setOverlayVisible(false);
+        SubmitButtonController.getInstance().forceDisabled(false);
+    }
 }

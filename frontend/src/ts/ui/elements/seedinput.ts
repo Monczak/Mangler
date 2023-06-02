@@ -2,23 +2,41 @@ import { Utils } from "@utils";
 import { IEventHandler } from "@events/eventhandler";
 import { Singleton } from "utils/singleton";
 
-export class SeedInputHandler extends Singleton<SeedInputHandler>() implements IEventHandler {
+export type SeedUpdateCallback = () => void;
+
+export class SeedInputHandler extends Singleton<SeedInputHandler>() implements IEventHandler {    
+    private updateCallbacks: Set<SeedUpdateCallback>;
+    
     constructor() {
         super();
+        this.updateCallbacks = new Set<SeedUpdateCallback>();
+    }
+
+    private notifyUpdate(): void {
+        this.updateCallbacks.forEach(callback => callback());
+    }
+
+    registerCallback(callback: SeedUpdateCallback): void {
+        this.updateCallbacks.add(callback);
+    }
+
+    unregisterCallback(callback: SeedUpdateCallback): void {
+        this.updateCallbacks.delete(callback);
     }
     
-    onChanged(elem: HTMLElement) {
+    private onChanged(elem: HTMLElement) {
         if (elem.textContent?.trim() === "")
             elem.classList.add("empty-span");
         else
             elem.classList.remove("empty-span");
+        this.notifyUpdate();
     }
     
-    onFocusedOut(elem: HTMLElement) {
+    private onFocusedOut(elem: HTMLElement) {
     
     }
     
-    onDoubleClicked(elem: HTMLElement) {
+    private onDoubleClicked(elem: HTMLElement) {
         Utils.selectElemText(elem);
     }
     
