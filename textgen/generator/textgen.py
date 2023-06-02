@@ -55,6 +55,7 @@ class AnalysisProgress:
     file_total: int
     text_current: int
     text_total: int
+    current_depth: int
 
     def dict(self):
         return asdict(self)
@@ -136,7 +137,7 @@ class TextGenerator:
                 for depth in depths:
                     analyzer = self._make_text_analyzer(text, depth)
                     for current, total in analyzer:
-                        yield AnalysisProgress(i, len(files), current, total)
+                        yield AnalysisProgress(i, len(files), current, total, depth)
                     sub_dict = analyzer.value
                     freq_dict.merge(sub_dict)
         

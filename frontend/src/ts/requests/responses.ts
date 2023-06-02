@@ -44,13 +44,15 @@ export class StatusAnalyzingResponse extends StatusResponse {
     fileTotal: number;
     textCurrent: number;
     textTotal: number;
+    currentDepth: number;
 
-    constructor(statusCode: number, fileCurrent: number, fileTotal: number, textCurrent: number, textTotal: number) {
+    constructor(statusCode: number, fileCurrent: number, fileTotal: number, textCurrent: number, textTotal: number, currentDepth: number) {
         super(statusCode);
         this.fileCurrent = fileCurrent;
         this.fileTotal = fileTotal;
         this.textCurrent = textCurrent;
         this.textTotal = textTotal;
+        this.currentDepth = currentDepth;
     }
 }
 
@@ -96,7 +98,7 @@ export class StatusResponseFactory {
             case 202:
                 switch (json.state) {
                     case "ANALYZING":
-                        return new StatusAnalyzingResponse(code, json.file_current, json.file_total, json.text_current, json.text_total);
+                        return new StatusAnalyzingResponse(code, json.file_current, json.file_total, json.text_current, json.text_total, json.current_depth);
                     case "GENERATING":
                         return new StatusGeneratingResponse(code, json.current, json.total);
                     default: throw new Error("Unknown status");
