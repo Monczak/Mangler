@@ -8,7 +8,8 @@ export class ErrorBeautifier {
         badDepth: 15,
         badTemp: 16,
         timeout: 98,
-        internal: 99
+        internal: 99,
+        notFound: -1,
     };
 
     private static getSeed(errorDetails: string): string {
@@ -69,6 +70,8 @@ export class ErrorBeautifier {
                 return `Text generation took too long. Try again with a smaller train depth range or less training files.`
             case this.errorCodes.internal:
                 return `The server could not process your request. Try again later.`
+            case this.errorCodes.notFound:
+                return `It seems the server is taking too long to take on your request. Try again later or try different parameters.`
             default:
                 return `I have no idea what happened. (error code ${errorData.code}, reason ${errorData.reason})`
         }

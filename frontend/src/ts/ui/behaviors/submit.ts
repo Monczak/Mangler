@@ -1,12 +1,19 @@
 import { ModalController } from "@elements/modalcontroller";
+import { ProgressBarController } from "@elements/progressbar";
 import { TextAreaHandler } from "@elements/textarea";
 import { FileStorage } from "@files";
 import { ExampleFile } from "@files/sourcefile"
 import { RequestManager } from "@requests";
-import { ErrorResponse, StatusAnalyzingResponse, StatusGeneratingResponse, StatusSuccessResponse, StatusFailureResponse } from "@requests/responses";
+import { StatusAnalyzingResponse, StatusGeneratingResponse, StatusSuccessResponse, StatusFailureResponse, StatusResponse } from "@requests/responses";
+
+const pollingInterval = 200;
+const pollAttempts = 20;
 
 export async function onSubmit() {
     TextAreaHandler.getInstance().setOverlayVisible(true);
+    ProgressBarController.getInstance().setProgressBarValue(0, 1);
+
+    document.querySelector("#submit-btn")?.classList.add("disabled");
     
     if (FileStorage.getInstance().filesChanged) {
         FileStorage.getInstance().resetFilesChanged();
@@ -18,8 +25,9 @@ export async function onSubmit() {
 async function generateText() {
     const [minTrainDepth, maxTrainDepth] = [...document.querySelectorAll("#slider-train-depths .slider-handle")]
         .map(elem => elem.getAttribute("aria-valuenow"))
-        .sort()
-        .map(n => n ? parseInt(n) : -1);
+        .map(n => n ? parseInt(n) : -1)
+        .sort((a: number, b: number) => a - b);
+    console.log([minTrainDepth, maxTrainDepth])
     const trainDepths = Array.from(Array(maxTrainDepth - minTrainDepth + 1), (v, k) => k + minTrainDepth);
     const genDepth = parseInt(document.querySelector("#slider-gen-depth .slider-handle")?.getAttribute("aria-valuenow") ?? "-1");
     const temperature = parseFloat(document.querySelector("#slider-temperature .slider-handle")?.getAttribute("aria-valuenow") ?? "1");
@@ -29,16 +37,16 @@ async function generateText() {
     const exampleIds = FileStorage.getInstance().files()
         .filter(file => file instanceof ExampleFile)
         .map(file => file.id());
-
-    console.log(FileStorage.getInstance().files());
     
     // TODO: What if uploaded files that use our ID get removed from the server, and that ID is no longer valid?
     const response = await RequestManager.getInstance().generateText(trainDepths, genDepth, seed, temperature, exampleIds);
     const taskId = response.taskId;
 
-    let notFoundAttempts = 10;
+    let notFoundAttempts = pollAttempts;
 
-    const pollStatus = async (onSuccess?: (taskId: string) => any, onFailure?: (response: StatusFailureResponse) => any) => {
+    ProgressBarController.getInstance().setProgressBarValue(0, 1);
+
+    const pollStatus = async (onSuccess?: (taskId: string) => any, onFailure?: (response: StatusFailureResponse) => any, onProgress?: (response: StatusResponse) => any, onNotFound?: () => any) => {
         const status = await RequestManager.getInstance().pollStatus(taskId);
         console.log(`${status instanceof StatusSuccessResponse} ${JSON.stringify(status)}`);
 
@@ -52,17 +60,44 @@ async function generateText() {
         }
 
         if (status instanceof StatusAnalyzingResponse || status instanceof StatusGeneratingResponse || status == null) {
-            if (status == null && --notFoundAttempts < 0)
-                throw new Error("Attempted to poll status for a non-existent ID")
-            setTimeout(async () => await pollStatus(onSuccess, onFailure), 500);
+            if (status == null && --notFoundAttempts < 0) {
+                if (onNotFound) onNotFound();
+                return;
+            }
+            if (onProgress && status) onProgress(status);
+            setTimeout(async () => await pollStatus(onSuccess, onFailure, onProgress, onNotFound), pollingInterval);
         }
     }
 
     await pollStatus(async taskId => {
         TextAreaHandler.getInstance().setGeneratedText(await RequestManager.getInstance().retrieveText(taskId));
         TextAreaHandler.getInstance().setOverlayVisible(false);
+        document.querySelector("#submit-btn")?.classList.remove("disabled");
     }, async response => {
         ModalController.getInstance().showErrorModal({code: response.errorCode, reason: response.reason, details: response.details});
         TextAreaHandler.getInstance().setOverlayVisible(false);
+        document.querySelector("#submit-btn")?.classList.remove("disabled");
+    }, response => {     
+        let current, total;
+        let text;
+
+        if (response instanceof StatusAnalyzingResponse) {
+            current = response.textCurrent;
+            total = response.textTotal;
+            text = `Analyzing (${response.fileCurrent + 1}/${response.fileTotal}) at depth ${response.currentDepth}`;
+        }
+        else if (response instanceof StatusGeneratingResponse) {
+            current = response.current;
+            total = response.total;
+            text = `Generating text`;
+        }
+        else throw new Error("Unexpected status response");
+
+        ProgressBarController.getInstance().setProgressBarText(text);
+        ProgressBarController.getInstance().setProgressBarValue(current, total);
+    }, () => {
+        ModalController.getInstance().showErrorModal({code: -1, reason: "not found"});
+        TextAreaHandler.getInstance().setOverlayVisible(false);
+        document.querySelector("#submit-btn")?.classList.remove("disabled");
     });
 }

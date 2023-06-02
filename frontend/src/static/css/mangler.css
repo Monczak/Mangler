@@ -286,3 +286,11 @@ a {
 .overlay.fade:not(.show) {
     pointer-events: none;
 }
+
+.no-transition {
+    transition: none !important;
+}
+
+.progress-bar {
+    background: rgb(109, 83, 146);
+}

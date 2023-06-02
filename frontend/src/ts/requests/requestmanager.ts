@@ -1,6 +1,6 @@
 import { Singleton } from "@utils/singleton";
 import { SourceFile, UploadedFile } from "@files/sourcefile";
-import { APIResponse, UploadResponse, GenerateResponse, StatusResponse, StatusResponseFactory } from "@requests/responses";
+import { APIResponse, UploadResponse, GenerateResponse, StatusResponseFactory } from "@requests/responses";
 
 export class RequestManager extends Singleton<RequestManager>() {
     private _inputId: string | undefined;
@@ -35,7 +35,8 @@ export class RequestManager extends Singleton<RequestManager>() {
             gen_depth: genDepth, 
             seed: seed, 
             temperature: temperature, 
-            examples: examples ?? []
+            examples: examples ?? [],
+            length: 10000,
         };
         
         console.log(payload);
