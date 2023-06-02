@@ -23,6 +23,7 @@ export class FilePanelHandler extends Singleton<FilePanelHandler>() implements I
             if (icon.classList.contains(this.rotateOn)) {
                 icon.classList.replace(this.rotateOn, this.rotateOff);
                 this.panel?.classList.replace(this.panelShow, this.panelHide);
+                this.panel?.classList.remove("overflow-visible");
             }
             else {
                 icon.classList.replace(this.rotateOff, this.rotateOn);
