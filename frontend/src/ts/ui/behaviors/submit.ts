@@ -1,3 +1,4 @@
+import { ModalController } from "@elements/modalcontroller";
 import { TextAreaHandler } from "@elements/textarea";
 import { FileStorage } from "@files";
 import { ExampleFile } from "@files/sourcefile"
@@ -29,6 +30,7 @@ async function generateText() {
 
     console.log(FileStorage.getInstance().files());
     
+    // TODO: What if uploaded files that use our ID get removed from the server, and that ID is no longer valid?
     const response = await RequestManager.getInstance().generateText(trainDepths, genDepth, seed, temperature, exampleIds);
     const taskId = response.taskId;
 
@@ -50,11 +52,11 @@ async function generateText() {
         if (status instanceof StatusAnalyzingResponse || status instanceof StatusGeneratingResponse || status == null) {
             if (status == null && --notFoundAttempts < 0)
                 throw new Error("Attempted to poll status for a non-existent ID")
-            setTimeout(async () => pollStatus(onSuccess, onFailure), 500);
+            setTimeout(async () => await pollStatus(onSuccess, onFailure), 500);
         }
     }
 
     await pollStatus(async taskId => {
         TextAreaHandler.getInstance().setGeneratedText(await RequestManager.getInstance().retrieveText(taskId));
-    });
+    }, async response => ModalController.getInstance().showErrorModal({code: response.errorCode, reason: response.reason, details: response.details}));
 }

@@ -251,3 +251,16 @@ a {
 .btn#submit-btn {
     background: rgb(76, 51, 112, 0.5);
 }
+
+.modal-content {
+    background: rgba(20, 14, 30, 0.7);
+    backdrop-filter: blur(3px);
+}
+
+.modal-header {
+    border-bottom: transparent;
+}
+
+.modal-footer {
+    border-top: transparent;
+}

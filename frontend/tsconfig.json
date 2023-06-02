@@ -36,6 +36,7 @@
       "@elements": ["ui/elements"],
       "@elements/*": ["ui/elements/*"],
       "@behaviors/*": ["ui/behaviors/*"],
+      "@uiutils/*": ["ui/utils/*"],
       "@files": ["files/filestorage"],
       "@files/*": ["files/*"],
       "@requests": ["requests/requestmanager"],

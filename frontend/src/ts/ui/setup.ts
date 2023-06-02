@@ -6,8 +6,9 @@ import { FileDropAreaHandler } from "@elements/filedroparea";
 
 import { FileStorage } from "@files";
 import bootstrapSlider from "bootstrap-slider";
-import { Tooltip } from "bootstrap";
+import { Tooltip, Modal } from "bootstrap";
 import { onSubmit } from "@behaviors/submit";
+import { ModalController } from "./elements/modalcontroller";
 
 export function setupUI() {
     
@@ -40,7 +41,8 @@ export function setupUI() {
         TextAreaHandler, 
         FileBadgeHandler, 
         FilePanelHandler,
-        FileDropAreaHandler
+        FileDropAreaHandler,
+        ModalController
     ]) {
         let handlerInstance = handler.getInstance();
         handlerInstance.setupEventListeners();
