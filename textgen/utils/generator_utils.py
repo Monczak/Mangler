@@ -26,7 +26,6 @@ class ValueKeepingGenerator:
 
 
 def keep_value(fun):
-    @wraps(fun)
     def wrapper(*args, **kwargs):
         return ValueKeepingGenerator(fun(*args, **kwargs))
     return wrapper

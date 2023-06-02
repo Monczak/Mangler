@@ -28,7 +28,7 @@ export function setupUI() {
         value: 3,
     });
     const temperature = new bootstrapSlider("#temperature", {
-        id: "temperature",
+        id: "slider-temperature",
         min: -5,
         max: 5,
         value: 1,

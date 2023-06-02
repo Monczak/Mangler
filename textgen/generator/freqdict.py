@@ -16,10 +16,10 @@ class FreqDict:
 
     Structure: current letter -> previous letters -> next letters -> probability
     """
-    def __init__(self, depths, name="", dict={}):
+    def __init__(self, depths, name="", dict=None):
         self.depths = set(depths)
         self.name = name if name else str(uuid.uuid4())
-        self._dict = dict
+        self._dict = dict if dict else {}
 
     @property
     def letters(self):

@@ -143,18 +143,20 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, te
         if not min_temp <= temperature <= max_temp:
             return handle_failure(Errors.BAD_TEMP, details=f"Temperature {temperature} is invalid, must be in range {min_temp} - {max_temp}")
 
+        freq_dict = None
+
         # Actually analyze and generate text
         with cache_manager.acquire_open(input_id, "r+b") as cache:
             serializer = FreqDictSerializer()
 
-            freq_dict = None
             should_create_freqdict = True
-            if cache.exists:
+
+            if cache.existed:
                 try:
-                    freq_dict = serializer.deserialize(cache.file.read())
-                    should_create_freqdict = not freq_dict.supports(train_depths, gen_depth)
+                    new_freq_dict = serializer.deserialize(cache.file.read())
+                    should_create_freqdict = not new_freq_dict.supports(train_depths, gen_depth)
                 except EOFError:
-                    logger.warning(f"Cache for {input_id} is corrupted, recreating")
+                    logger.warning(f"Cache for {input_id} is missing/corrupted, recreating")
             
             if should_create_freqdict:
                 logger.info(f"Creating new freqdict for {input_id}")
@@ -171,9 +173,11 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, te
 
                 logger.info(f"Caching {freq_dict.name}")
                 cache.file.seek(0)
+                cache.file.truncate(0)
                 cache.file.write(serializer.serialize(freq_dict))
             else:
                 logger.info(f"Using cached freqdict for {input_id}")
+                freq_dict = new_freq_dict
 
         buffer_size = config["textgen"]["buffer_size"]
         max_gen_retries = config["textgen"]["max_gen_retries"]

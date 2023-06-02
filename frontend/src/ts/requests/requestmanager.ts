@@ -38,6 +38,8 @@ export class RequestManager extends Singleton<RequestManager>() {
             examples: examples ?? []
         };
         
+        console.log(payload);
+
         const response = await fetch("api/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

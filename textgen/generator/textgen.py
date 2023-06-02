@@ -130,6 +130,7 @@ class TextGenerator:
         files = self.find_files(source_id)
         for i in range(len(files)):
             path = files[i]
+            logger.info(f"Analyzing {path}")
             with open(path, "r") as text_file:
                 text = text_file.read()
                 for depth in depths:

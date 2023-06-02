@@ -102,7 +102,8 @@ a {
 }
 
 .generated-text {
-    color:#d9d1dc;
+    color: #d9d1dc;
+    white-space: pre-wrap;
 }
 
 .form-control {

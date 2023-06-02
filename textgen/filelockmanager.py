@@ -43,6 +43,8 @@ class FileLockManager:
             self._lock = Lock(self._outer.redis, f"file:{file_name}")
             self._blocking = blocking
 
+            self.existed = False
+
         @abc.abstractmethod
         def _on_enter(self):
             pass
@@ -71,7 +73,8 @@ class FileLockManager:
                 
         @property
         def exists(self):
-            return self._cache_path.exists()
+            return self._cache_path.is_file()
+
     
     class Acquire(_AcquireBase):
         def _on_enter(self):
@@ -87,6 +90,7 @@ class FileLockManager:
             self._file_obj = None
         
         def _on_enter(self):
+            self.existed = self.exists
             if not self.exists:
                 open(self._cache_path, "a").close()
 

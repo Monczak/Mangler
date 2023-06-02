@@ -26,6 +26,8 @@ async function generateText() {
     const exampleIds = FileStorage.getInstance().files()
         .filter(file => file instanceof ExampleFile)
         .map(file => file.id());
+
+    console.log(FileStorage.getInstance().files());
     
     const response = await RequestManager.getInstance().generateText(trainDepths, genDepth, seed, temperature, exampleIds);
     const taskId = response.taskId;
@@ -53,7 +55,6 @@ async function generateText() {
     }
 
     await pollStatus(async taskId => {
-        console.log("SUCCESS");
         TextAreaHandler.getInstance().setGeneratedText(await RequestManager.getInstance().retrieveText(taskId));
     });
 }
