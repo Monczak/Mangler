@@ -9,6 +9,7 @@ import bootstrapSlider from "bootstrap-slider";
 import { Tooltip, Modal } from "bootstrap";
 import { onSubmit } from "@behaviors/submit";
 import { ModalController } from "./elements/modalcontroller";
+import { ProgressBarController } from "@elements/progressbar";
 
 export function setupUI() {
     
@@ -42,7 +43,8 @@ export function setupUI() {
         FileBadgeHandler, 
         FilePanelHandler,
         FileDropAreaHandler,
-        ModalController
+        ModalController,
+        ProgressBarController
     ]) {
         let handlerInstance = handler.getInstance();
         handlerInstance.setupEventListeners();
