@@ -264,3 +264,25 @@ a {
 .modal-footer {
     border-top: transparent;
 }
+
+.panel-darker.text-area {
+    position: relative;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+
+    cursor: default;
+    
+    background: rgba(20, 14, 30, 0.3);
+    backdrop-filter: blur(3px);
+}
+
+.overlay.fade:not(.show) {
+    pointer-events: none;
+}

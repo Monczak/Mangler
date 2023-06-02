@@ -24,7 +24,7 @@ export class ErrorBeautifier {
         if (!matches || !matches.groups?.chars)
             throw new Error("Invalid API response");
         
-        return matches.groups.seed;
+        return matches.groups.chars;
     }
 
     private static getDepthInfo(errorDetails: string) {
@@ -49,7 +49,7 @@ export class ErrorBeautifier {
                 return `We tried as hard as we could, but we could not generate text. Try a different seed.`;
             case this.errorCodes.badSeed:
                 if (!errorData.details) throw new Error("Must specify details");
-                return `Can't generate text with the seed "${this.getSeed(errorData.details)}". Try a different seed."`;
+                return `Can't generate text with the seed "${this.getSeed(errorData.details)}". Try a different seed.`;
             case this.errorCodes.badSeedLength:
                 if (!errorData.details) throw new Error("Must specify details");    
                 return `The seed "${this.getSeed(errorData.details)}" is too short. It must be at least ${this.getMinSeedLength(errorData.details)} letters long.`;

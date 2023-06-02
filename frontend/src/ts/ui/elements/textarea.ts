@@ -36,6 +36,18 @@ export class TextAreaHandler extends Singleton<TextAreaHandler>() implements IEv
         }
     }
 
+    setOverlayVisible(visible: boolean) {
+        const overlay = document.querySelector("#text-area > .overlay");
+        if (overlay) {
+            if (visible) {
+                overlay.classList.add("show");
+            }
+            else {
+                overlay.classList.remove("show");
+            }
+        }
+    }
+
     setGeneratedText(text: string) {
         const generatedTextSpan = document.querySelector("#generated-text");
         if (generatedTextSpan)

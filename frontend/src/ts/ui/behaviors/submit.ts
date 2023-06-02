@@ -6,6 +6,8 @@ import { RequestManager } from "@requests";
 import { ErrorResponse, StatusAnalyzingResponse, StatusGeneratingResponse, StatusSuccessResponse, StatusFailureResponse } from "@requests/responses";
 
 export async function onSubmit() {
+    TextAreaHandler.getInstance().setOverlayVisible(true);
+    
     if (FileStorage.getInstance().filesChanged) {
         FileStorage.getInstance().resetFilesChanged();
         await RequestManager.getInstance().upload([...FileStorage.getInstance().files()]);
@@ -58,5 +60,9 @@ async function generateText() {
 
     await pollStatus(async taskId => {
         TextAreaHandler.getInstance().setGeneratedText(await RequestManager.getInstance().retrieveText(taskId));
-    }, async response => ModalController.getInstance().showErrorModal({code: response.errorCode, reason: response.reason, details: response.details}));
+        TextAreaHandler.getInstance().setOverlayVisible(false);
+    }, async response => {
+        ModalController.getInstance().showErrorModal({code: response.errorCode, reason: response.reason, details: response.details});
+        TextAreaHandler.getInstance().setOverlayVisible(false);
+    });
 }
