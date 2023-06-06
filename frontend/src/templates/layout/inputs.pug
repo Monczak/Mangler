@@ -29,7 +29,8 @@ include mixins/inputs
                 .col-12.col-md-7
                     input#temperature(type="text", name="temperature", value="")
         .col-12.col-md-2.d-flex.align-items-center.justify-content-center
-            button.btn#submit-btn Mangle!
+            span.d-inline-block.submit-btn-tooltip(tabindex="0", data-bs-toggle="tooltip", data-bs-placement="top", data-bs-custom-class="tooltip", data-bs-html="true", title="")
+                button.btn#submit-btn Mangle!
 
     .row.file-panel#file-panel
         .col-auto.p-2.d-flex.align-items-center

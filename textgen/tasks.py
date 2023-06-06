@@ -45,6 +45,8 @@ class Errors(Enum):
     BAD_DEPTH = {"code": 15, "reason": "bad depth"}
     BAD_TEMP = {"code": 16, "reason": "bad temperature"}
 
+    INVALID_INPUT_ID = {"code": 20, "reason": "invalid input ID"}
+
     TIMEOUT = {"code": 98, "reason": "timeout"}
 
     INTERNAL = {"code": 99, "reason": "internal"}
@@ -130,6 +132,9 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, te
 
     try:
         # Some safety checks to ensure the task's args are nice and valid
+        if input_id.strip() == "":
+            return handle_failure(Errors.INVALID_INPUT_ID)
+
         if any([not 0 < depth <= config["textgen"]["max_depth"] for depth in train_depths]) or gen_depth > config["textgen"]["max_depth"]:
             return handle_failure(Errors.INVALID_DEPTH)
         
@@ -217,11 +222,12 @@ def generate_text_task(self, input_id, train_depths, gen_depth, seed, length, te
         return handle_failure(Errors.BAD_SEED_LENGTH, details=str(err))
     except DepthError as err:
         return handle_failure(Errors.BAD_DEPTH, details=str(err))
-    except (FileNotFoundError, TextgenError) as err:
+    except FileNotFoundError as err:
+        return handle_failure(Errors.INVALID_INPUT_ID)
+    except TextgenError as err:
         logger.warning(str(err))
         raise Ignore()
     except SoftTimeLimitExceeded as err:
-        # Do cleanup here
         return handle_failure(Errors.TIMEOUT)
     except Exception as err:
         logger.error(str(err))

@@ -1,8 +1,10 @@
 import { IEventHandler } from "@events/eventhandler";
 import { Singleton } from "@utils/singleton";
+import { Tooltip } from "bootstrap";
 
 export class SubmitButtonController extends Singleton<SubmitButtonController>() implements IEventHandler {
     private submitBtn?: HTMLButtonElement | null;
+    private tooltipContainer?: HTMLElement | null;
 
     private forceDisable: boolean = false;
     private enabled: boolean = true;
@@ -32,7 +34,18 @@ export class SubmitButtonController extends Singleton<SubmitButtonController>() 
         this.update();
     }
 
+    setTooltipText(text: string): void {
+        if (this.tooltipContainer) {
+            this.tooltipContainer.setAttribute("title", text);
+            this.tooltipContainer.setAttribute("data-bs-original-title", text);
+
+            // Need to recreate the tooltip to refresh the text in Bootstrap
+            const newTooltip = new Tooltip(this.tooltipContainer);
+        }
+    }
+
     setupEventListeners(): void {
         this.submitBtn = document.querySelector("#submit-btn") as HTMLButtonElement;
+        this.tooltipContainer = document.querySelector(".submit-btn-tooltip") as HTMLElement;
     }
 }

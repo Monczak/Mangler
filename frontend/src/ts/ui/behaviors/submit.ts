@@ -14,7 +14,7 @@ export async function onSubmit() {
     TextAreaHandler.getInstance().setOverlayVisible(true);
     ProgressBarController.getInstance().setProgressBarValue(0, 1);
 
-    document.querySelector("#submit-btn")?.classList.add("disabled");
+    SubmitButtonController.getInstance().forceDisabled(true);
     
     if (FileStorage.getInstance().filesChanged) {
         FileStorage.getInstance().resetFilesChanged();
@@ -39,7 +39,6 @@ async function generateText() {
         .filter(file => file instanceof ExampleFile)
         .map(file => file.id());
     
-    // TODO: What if uploaded files that use our ID get removed from the server, and that ID is no longer valid?
     const response = await RequestManager.getInstance().generateText(trainDepths, genDepth, seed, temperature, exampleIds);
     const taskId = response.taskId;
 
@@ -47,7 +46,7 @@ async function generateText() {
 
     ProgressBarController.getInstance().setProgressBarValue(0, 1);
 
-    const pollStatus = async (onSuccess?: (taskId: string) => any, onFailure?: (response: StatusFailureResponse) => any, onProgress?: (response: StatusResponse) => any, onNotFound?: () => any) => {
+    const pollStatus = async (onSuccess: (taskId: string) => any, onFailure: (response: StatusFailureResponse) => any, onProgress: (response: StatusResponse) => any, onNotFound: () => any) => {
         const status = await RequestManager.getInstance().pollStatus(taskId);
         console.log(`${status instanceof StatusSuccessResponse} ${JSON.stringify(status)}`);
 

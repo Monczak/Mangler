@@ -294,3 +294,7 @@ a {
 .progress-bar {
     background: rgb(109, 83, 146);
 }
+
+.submit-btn-tooltip {
+    pointer-events: all;
+}

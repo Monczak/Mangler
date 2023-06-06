@@ -5,7 +5,6 @@ import { FilePanelHandler } from "@elements/filepanel";
 import { FileDropAreaHandler } from "@elements/filedroparea";
 
 import { FileStorage } from "@files";
-import bootstrapSlider from "bootstrap-slider";
 import { Tooltip } from "bootstrap";
 import { onSubmit } from "@behaviors/submit";
 import { ModalController } from "./elements/modalcontroller";

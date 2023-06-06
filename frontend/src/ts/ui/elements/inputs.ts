@@ -16,6 +16,10 @@ export class InputHandler extends Singleton<InputHandler>() implements IEventHan
     temperatureHandle!: HTMLElement;
 
     seedInput!: HTMLElement;
+
+    invalidDepthText = () => `The generation depth must be one of the training depths.`
+    invalidSeedText = (length: number) => `The seed must be at least ${length} characters long.`
+    noFilesText = () => `You must provide at least 1 file.`
     
     getInputs() {
         const [minTrainDepth, maxTrainDepth] = this.trainDepthHandles
@@ -45,18 +49,37 @@ export class InputHandler extends Singleton<InputHandler>() implements IEventHan
         }
     }
 
-    validateInputs(): boolean {
-        const inputs = this.getInputs();
+    getValidationErrors(): Array<string> {
+        const errors = [];
+
+        if (!this.validateTrainDepths()) errors.push(this.invalidDepthText());
+        if (!this.validateSeed()) errors.push(this.invalidSeedText(this.getInputs().genDepth + 1));
+        if (!this.validateUploadIds()) errors.push(this.noFilesText());
     
-        if (!inputs.trainDepths.includes(inputs.genDepth)) return false;
-        if (inputs.seed.length <= inputs.genDepth) return false;
-        if (inputs.uploadIds.length + inputs.exampleIds.length < 1) return false;
-    
-        return true;
+        return errors;
     }
 
-    setSubmitButtonEnabled() {
-        SubmitButtonController.getInstance().setEnabled(this.validateInputs());
+    validateTrainDepths(): boolean {
+        const inputs = this.getInputs();
+        return inputs.trainDepths.includes(inputs.genDepth);
+    }
+
+    validateSeed(): boolean {
+        const inputs = this.getInputs();
+        return inputs.seed.length > inputs.genDepth;
+    }
+
+    validateUploadIds(): boolean {
+        const inputs = this.getInputs();
+        return inputs.uploadIds.length + inputs.exampleIds.length >= 1;
+    }
+ 
+    setSubmitButtonStatus() {
+        const errors = this.getValidationErrors();
+        SubmitButtonController.getInstance().setEnabled(errors.length == 0);
+        
+        const tooltipText = errors.length == 0 ? "" : errors.join("<br>");
+        SubmitButtonController.getInstance().setTooltipText(tooltipText);
     }
 
     setupEventListeners(): void {
@@ -86,14 +109,14 @@ export class InputHandler extends Singleton<InputHandler>() implements IEventHan
         this.temperatureHandle = document.querySelector("#slider-temperature .slider-handle") as HTMLElement;
         this.seedInput = document.querySelector("#seed-input") as HTMLElement;
 
-        this.trainDepthSlider.on("slide", () => this.setSubmitButtonEnabled());
-        this.genDepthSlider.on("slide", () => this.setSubmitButtonEnabled());
-        this.temperatureSlider.on("slide", () => this.setSubmitButtonEnabled());
+        this.trainDepthSlider.on("slide", () => this.setSubmitButtonStatus());
+        this.genDepthSlider.on("slide", () => this.setSubmitButtonStatus());
+        this.temperatureSlider.on("slide", () => this.setSubmitButtonStatus());
 
-        SeedInputHandler.getInstance().registerCallback(() => this.setSubmitButtonEnabled());
-        FileStorage.getInstance().registerCallback(() => this.setSubmitButtonEnabled());
+        SeedInputHandler.getInstance().registerCallback(() => this.setSubmitButtonStatus());
+        FileStorage.getInstance().registerCallback(() => this.setSubmitButtonStatus());
 
-        this.setSubmitButtonEnabled();
+        window.addEventListener("DOMContentLoaded", () => this.setSubmitButtonStatus());
     }
 }
 
