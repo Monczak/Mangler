@@ -16,4 +16,5 @@ WORKDIR ${COMMON_PATH}
 RUN pip install --no-cache-dir .
 WORKDIR ${MANGLER_ROOT}
 
-ENTRYPOINT ./beat.sh
+RUN chmod +x ./beat.sh
+ENTRYPOINT [ "./beat.sh" ]

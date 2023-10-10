@@ -18,5 +18,5 @@ WORKDIR ${ROOT}
 
 COPY backend/ .
 
-
-ENTRYPOINT ./beat.sh
+RUN chmod +x ./beat.sh
+ENTRYPOINT [ "./beat.sh" ]

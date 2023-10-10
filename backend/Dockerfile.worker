@@ -18,5 +18,5 @@ WORKDIR ${ROOT}
 
 COPY backend/ .
 
-
-ENTRYPOINT ./worker.sh
+RUN chmod +x ./worker.sh
+ENTRYPOINT [ "./worker.sh" ]

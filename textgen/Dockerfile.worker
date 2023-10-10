@@ -16,4 +16,5 @@ WORKDIR ${COMMON_PATH}
 RUN pip install --no-cache-dir .
 WORKDIR ${MANGLER_ROOT}
 
-ENTRYPOINT ./worker.sh
+RUN chmod +x ./worker.sh
+ENTRYPOINT [ "./worker.sh" ]
